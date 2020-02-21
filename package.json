@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "hw1": "node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['yellow', 'blue', 'purple']\" --deep=1 --path='~/Downloads'"
   },
   "repository": {
     "type": "git",

@@ -1,7 +1,9 @@
+const { argv } = require("yargs");
+
 const first = require("./first.js");
 const { second } = require("./second.js");
 require("./third.js");
 
-first();
-second();
-third();
+first(argv);
+// second();
+// third();
