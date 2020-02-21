@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "hw1": "node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['yellow', 'blue', 'purple']\" --deep=1 --path='~/Downloads'"
+    "hw1": "node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['yellow', 'blue', 'purple']\" --deep=1 --path='Downloads'"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/EugZ/hillel_nodejs#readme",
   "dependencies": {
+    "chalk": "^3.0.0",
     "yargs": "^15.1.0"
   }
 }
