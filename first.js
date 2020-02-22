@@ -2,6 +2,7 @@ const fs = require("fs");
 const pathModule = require("path");
 const chalk = require("chalk");
 
+// TODO: to the separate module
 function convertArgToArray(argument) {
   if (Array.isArray(argument)) {
     return argument;
@@ -15,6 +16,7 @@ function convertArgToArray(argument) {
     .map(elem => elem.trim());
 }
 
+// TODO: to the separate module
 function checkFileExtension(file, requiredExtensions) {
   requiredExtensions = convertArgToArray(requiredExtensions);
 
@@ -30,6 +32,7 @@ function checkFileExtension(file, requiredExtensions) {
   return isFileWithTargetExt;
 }
 
+// TODO: to the separate module
 let colorCounter = 0;
 function defineColorToDraw(colors) {
   if (colors.length === colorCounter) {
@@ -38,14 +41,16 @@ function defineColorToDraw(colors) {
   return colors[colorCounter++];
 }
 
+// TODO: to the separate module
 function drawFileName(file, colors) {
   colors = convertArgToArray(colors);
   console.log(chalk[defineColorToDraw(colors)](file));
 }
 
+let currentDeepness = 1;
 function first(args) {
-  const { ext = [], colors = ["red", "green", "blue"], deep = 0, path } = args;
-  const absolutePathToDirectory = pathModule.resolve("/home/eugene", args.path);
+  const { ext, colors, deep, path } = args;
+  const absolutePathToDirectory = pathModule.resolve(process.env.HOME, path);
 
   fs.access(absolutePathToDirectory, err => {
     if (err) {
@@ -58,9 +63,21 @@ function first(args) {
       }
 
       files.forEach(file => {
-        if (checkFileExtension(file, ext)) {
-          drawFileName(file, colors);
-        }
+        const currentPath = pathModule.resolve(absolutePathToDirectory, file);
+        fs.stat(currentPath, (err, stats) => {
+          if (err) {
+            throw new Error(err.message);
+          }
+          if (stats.isDirectory()) {
+            // currentDeepness++;
+            first({ ext, colors, deep, path: currentPath });
+          }
+          if (stats.isFile()) {
+            if (checkFileExtension(file, ext)) {
+              drawFileName(file, colors);
+            }
+          }
+        });
       });
     });
   });
