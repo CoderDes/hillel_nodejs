@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cross-env node app.js",
+    "start": "cross-env node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['green', 'red', 'cyan']\" --path='Downloads'",
     "hw1": "cross-env node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['yellow', 'blue', 'magenta']\" --deep=0 --path='Downloads'"
   },
   "repository": {
