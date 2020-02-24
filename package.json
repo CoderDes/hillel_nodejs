@@ -1,0 +1,30 @@
+{
+  "name": "hillel_nodejs",
+  "version": "1.0.0",
+  "description": "nodejs course",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['green', 'red', 'cyan']\" --path='Downloads'",
+    "hw1": "cross-env node app.js --ext=\"['.mp3', '.acc']\" --colors=\"['yellow', 'blue', 'magenta']\" --deep=0 --path='Downloads'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EugZ/hillel_nodejs.git"
+  },
+  "keywords": [
+    "javascript",
+    "nodejs"
+  ],
+  "author": "Eugene Zubkov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EugZ/hillel_nodejs/issues"
+  },
+  "homepage": "https://github.com/EugZ/hillel_nodejs#readme",
+  "dependencies": {
+    "chalk": "^3.0.0",
+    "cross-env": "^7.0.0",
+    "yargs": "^15.1.0"
+  }
+}
