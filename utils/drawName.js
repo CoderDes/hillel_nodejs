@@ -1,11 +1,12 @@
 const chalk = require("chalk");
 
-const { defineColorToDraw } = require("./defineColor.js");
 const { convertArgToArray } = require("./convertToArray.js");
 
+let colorNumber = 0;
 function drawFileName(file, colors) {
   colors = convertArgToArray(colors);
-  console.log(chalk[defineColorToDraw(colors)](file));
+  colorNumber = colorNumber === colors.length - 1 ? 0 : colorNumber + 1;
+  console.log(chalk.keyword(colors[colorNumber])(file));
 }
 
 module.exports = drawFileName;
