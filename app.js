@@ -1,11 +1,16 @@
+const pathModule = require("path");
+const { homedir } = require("os");
 const { argv } = require("yargs");
 
-const first = require("./first.js");
-const { second } = require("./second.js");
-require("./third.js");
+const Finder = require("./finder.js");
 
 const { colors = ["red", "green", "blue"], deep = 0, path } = argv;
+const { EXT } = process.env;
 
-first({ colors, deep, path });
-// second();
-// third();
+const myFinder = new Finder(
+  pathModule.resolve(homedir(), path),
+  deep,
+  EXT,
+  colors,
+  "lol"
+);
