@@ -6,7 +6,7 @@ const calcCurrentDeepness = require("./utils/calcDeepness.js");
 const drawFileName = require("./utils/drawName.js");
 
 function first(args) {
-  const { ext, colors, deep, path } = args;
+  const { colors, deep, path } = args;
   const absolutePathToDirectory = pathModule.resolve(process.env.HOME, path);
 
   fs.access(absolutePathToDirectory, err => {
@@ -32,10 +32,10 @@ function first(args) {
             throw new Error(err.message);
           }
           if ((stats.isDirectory() && !deep) || currentDeep <= deep) {
-            first({ ext, colors, deep, path: absolutePathToCurrentFile });
+            first({ colors, deep, path: absolutePathToCurrentFile });
           }
           if (stats.isFile()) {
-            if (checkFileExtension(file, ext)) {
+            if (checkFileExtension(file, process.env.EXT)) {
               drawFileName(file, colors);
             }
           }

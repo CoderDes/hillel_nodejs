@@ -3,12 +3,7 @@ function convertArgToArray(argument) {
     return argument;
   }
 
-  return argument
-    .replace(/'/g, "")
-    .replace(/\[/g, "")
-    .replace(/\]/g, "")
-    .split(",")
-    .map(elem => elem.trim());
+  return JSON.parse(argument);
 }
 
 module.exports.convertArgToArray = convertArgToArray;
