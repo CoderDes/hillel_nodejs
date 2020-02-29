@@ -1,5 +1,6 @@
 const fs = require("fs");
 const pathModule = require("path");
+const { homedir } = require("os");
 
 const checkFileExtension = require("./utils/checkExtension.js");
 const calcCurrentDeepness = require("./utils/calcDeepness.js");
@@ -7,7 +8,7 @@ const drawFileName = require("./utils/drawName.js");
 
 function first(args) {
   const { colors, deep, path } = args;
-  const absolutePathToDirectory = pathModule.resolve(process.env.HOME, path);
+  const absolutePathToDirectory = pathModule.resolve(homedir(), path);
 
   fs.access(absolutePathToDirectory, err => {
     if (err) {
