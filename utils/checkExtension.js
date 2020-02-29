@@ -3,18 +3,15 @@ const pathModule = require("path");
 const { convertArgToArray } = require("./convertToArray.js");
 
 function checkFileExtension(file, requiredExtensions) {
-  requiredExtensions = convertArgToArray(process.env.EXT);
+  requiredExtensions = convertArgToArray(requiredExtensions);
 
-  const fileExt = pathModule.extname(file);
-  let isFileWithTargetExt = false;
-
-  for (ext of requiredExtensions) {
-    if (ext === fileExt) {
-      isFileWithTargetExt = true;
-    }
+  if (!requiredExtensions.length) {
+    throw new Error("Please, pass at least one extension to search.");
   }
 
-  return isFileWithTargetExt;
+  const fileExt = pathModule.extname(file);
+
+  return requiredExtensions.includes(fileExt);
 }
 
 module.exports = checkFileExtension;
