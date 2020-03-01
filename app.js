@@ -4,7 +4,7 @@ const { argv } = require("yargs");
 
 const Finder = require("./finder.js");
 
-const { colors = ["red", "green", "blue"], deep = 0, path } = argv;
+const { colors = ["red", "green", "blue"], deep = 0, path, filter } = argv;
 const { EXT } = process.env;
 
 const myFinder = new Finder(
@@ -12,5 +12,5 @@ const myFinder = new Finder(
   deep,
   EXT,
   colors,
-  "lol"
+  filter
 );

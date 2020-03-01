@@ -5,20 +5,19 @@ const EventEmitter = require("events");
 
 const chalk = require("chalk");
 
-// TODO: Опционально - 4-й параметр - строка, которая будет ещё отсеивать по вхождению в название файла.
 class Finder extends EventEmitter {
   constructor(
     dirPath = homedir(),
     deep = 0,
     ext = [],
     colors = "green",
-    filterString = ""
+    filter = ""
   ) {
     super();
     this.initialPath = dirPath;
     this.deep = deep;
     this.ext = JSON.parse(ext);
-    this.filterString = filterString;
+    this.filter = filter;
     this.colorNumber = 0;
     this.colors = JSON.parse(colors);
     this.timerId;
@@ -71,6 +70,9 @@ class Finder extends EventEmitter {
   }
   handleFile(filePath) {
     this.checked.files++;
+    if (this.filter && !filePath.includes(this.filter)) {
+      return;
+    }
     if (this.checkFileExtension(filePath, process.env.EXT)) {
       this.drawFileName(filePath, this.colors);
     }
