@@ -25,22 +25,6 @@ class Finder extends EventEmitter {
       files: 0,
       directories: 0
     };
-    this.on("started", () => this.parse(this.initialPath));
-    this.on("file", filePath => {
-      clearTimeout(this.timerId);
-      this.handleFile(filePath);
-      this.timerId = setTimeout(() => {
-        this.emit("processing", this.checked);
-        this.emit("finished");
-      }, 2000);
-    });
-    this.on("directory", dirPath => this.handleDirectory(dirPath));
-    this.on("processing", checked =>
-      console.log(
-        `Were checked ${checked.files} files, ${checked.directories} directories.`
-      )
-    );
-    this.on("finished", () => console.log("PARSING IS FINISHED"));
     this.emit("started");
   }
   checkPath(path) {
