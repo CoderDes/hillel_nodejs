@@ -27,11 +27,11 @@ class Finder extends EventEmitter {
     };
   }
   checkPath(path) {
-    fs.access(path, err => {
-      if (err) {
-        throw new Error(err.message);
-      }
-    });
+    try {
+      fs.accessSync(path);
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
   calcCurrentDeepness(elemPath) {
     const relativePath = pathModule.relative(elemPath, this.initialPath);
@@ -78,14 +78,17 @@ class Finder extends EventEmitter {
       }
     });
   }
+  readDirectory(path) {
+    try {
+      return fs.readdirSync(path, { withFileTypes: true });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
   parse(path) {
     this.checkPath(path);
-    fs.readdir(path, { withFileTypes: true }, (err, dirElems) => {
-      if (err) {
-        throw new Error(err.message);
-      }
-      this.iterateDirectoryContent(dirElems, path);
-    });
+    const dirElems = this.readDirectory(path);
+    this.iterateDirectoryContent(dirElems, path);
   }
 }
 
