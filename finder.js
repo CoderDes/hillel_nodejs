@@ -25,7 +25,6 @@ class Finder extends EventEmitter {
       files: 0,
       directories: 0
     };
-    this.emit("started");
   }
   checkPath(path) {
     fs.access(path, err => {

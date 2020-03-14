@@ -7,26 +7,24 @@ const Finder = require("./finder.js");
 const { colors = ["red", "green", "blue"], deep = 0, path, filter } = argv;
 const { EXT } = process.env;
 
-const myFinder = new Finder(
-  pathModule.resolve(homedir(), path),
-  deep,
-  EXT,
-  colors,
-  filter
-);
+const targetPath = pathModule.resolve(homedir(), path);
 
-myFinder.on("stated", this.parse(this.initialPath));
+const myFinder = new Finder(targetPath, deep, EXT, colors, filter);
+
+myFinder.on("started", () => {
+  myFinder.parse(targetPath);
+});
 
 myFinder.on("file", filePath => {
-  clearTimeout(this.timerId);
-  this.handleFile(filePath);
-  this.timerId = setTimeout(() => {
-    this.emit("processing", this.checked);
-    this.emit("finished");
+  clearTimeout(myFinder.timerId);
+  myFinder.handleFile(filePath);
+  myFinder.timerId = setTimeout(() => {
+    myFinder.emit("processing", myFinder.checked);
+    myFinder.emit("finished");
   }, 2000);
 });
 
-myFinder.on("directory", dirPath => this.handleDirectory(dirPath));
+myFinder.on("directory", dirPath => myFinder.handleDirectory(dirPath));
 
 myFinder.on("processing", checked => {
   console.log(
@@ -35,3 +33,5 @@ myFinder.on("processing", checked => {
 });
 
 myFinder.on("finished", () => console.log("PARSING IS FINISHED"));
+
+myFinder.emit("started");
