@@ -53,9 +53,7 @@ class Finder extends EventEmitter {
   }
   handleFile(filePath) {
     this.checked.files++;
-    if (this.filter && !filePath.includes(this.filter)) {
-      return;
-    }
+
     if (this.checkFileExtension(filePath, process.env.EXT)) {
       this.drawFileName(filePath, this.colors);
     }
@@ -70,7 +68,7 @@ class Finder extends EventEmitter {
       const currentPath = pathModule.resolve(path, name);
       const currentDeep = this.calcCurrentDeepness(currentPath);
 
-      if (elem.isFile()) {
+      if (elem.isFile() && elem.name.includes(this.filter)) {
         this.emit("file", currentPath);
       }
       if ((elem.isDirectory() && !this.deep) || currentDeep <= this.deep) {
