@@ -20,18 +20,20 @@ myFinder.on("file", filePath => {
   myFinder.handleFile(filePath);
   myFinder.timerId = setTimeout(() => {
     myFinder.emit("processing", myFinder.checked);
-    myFinder.emit("finished");
   }, 2000);
 });
 
 myFinder.on("directory", dirPath => myFinder.handleDirectory(dirPath));
 
-myFinder.on("processing", checked => {
+myFinder.on("processing", checked =>
   console.log(
-    `Were checked ${checked.files} files, ${checked.directories} directories.`
-  );
-});
+    `Processing... 
+     Were checked ${checked.files} files, ${checked.directories} directories.
+    `
+  )
+);
 
-myFinder.on("finished", () => console.log("PARSING IS FINISHED"));
+// myFinder.emit("finished");
+// myFinder.on("finished", () => console.log("Parsing is finished."));
 
 myFinder.emit("started");
