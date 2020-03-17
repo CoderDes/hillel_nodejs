@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"green\", \"red\", \"cyan\"]' --path='Downloads'",
     "hw1": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"yellow\", \"blue\", \"magenta\"]' --deep=0 --path='Downloads'",
-    "hw2": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"yellow\", \"blue\", \"magenta\"]' --deep=0 --path='Downloads' --filter='Tommy'"
+    "hw2": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"yellow\", \"blue\", \"magenta\"]' --deep=1 --path='Downloads' --filter='Tommy'"
   },
   "repository": {
     "type": "git",

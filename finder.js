@@ -77,7 +77,7 @@ class Finder extends EventEmitter {
       if (elem.isFile() && elem.name.includes(this.filter)) {
         this.emit("file", currentPath);
       }
-      if ((elem.isDirectory() && !this.deep) || currentDeep <= this.deep) {
+      if ((elem.isDirectory() && !this.deep) || currentDeep < this.deep) {
         this.emit("directory", currentPath);
       }
     });
