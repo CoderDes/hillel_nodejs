@@ -11,7 +11,7 @@ const targetPath = pathModule.resolve(homedir(), path);
 
 const myFinder = new Finder(targetPath, deep, EXT, colors, filter);
 
-myFinder.on("started", () => {
+myFinder.once("started", () => {
   myFinder.parse(targetPath);
 });
 
@@ -33,7 +33,7 @@ myFinder.on("processing", checked =>
   )
 );
 
-// myFinder.emit("finished");
-// myFinder.on("finished", () => console.log("Parsing is finished."));
-
-myFinder.emit("started");
+myFinder.once("finished", () => {
+  clearTimeout(myFinder.timerId);
+  console.log("Parsing is finished.");
+});

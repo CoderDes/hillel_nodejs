@@ -25,6 +25,9 @@ class Finder extends EventEmitter {
       files: 0,
       directories: 0
     };
+    setImmediate(() => {
+      this.emit("started");
+    });
   }
   checkPath(path) {
     try {
@@ -61,6 +64,9 @@ class Finder extends EventEmitter {
   handleDirectory(dirPath) {
     this.checked.directories++;
     this.parse(dirPath);
+    setImmediate(() => {
+      this.emit("finished");
+    });
   }
   iterateDirectoryContent(elements, path) {
     elements.forEach(elem => {
