@@ -9,15 +9,15 @@ class Finder extends EventEmitter {
   constructor(
     dirPath = homedir(),
     deep = 0,
-    ext = [],
     colors = "green",
-    filter = ""
+    search,
+    name
   ) {
     super();
     this.initialPath = dirPath;
     this.deep = deep;
-    this.ext = JSON.parse(ext);
-    this.filter = filter;
+    this.search = search;
+    this.name = name;
     this.colorNumber = 0;
     this.colors = JSON.parse(colors);
     this.timerId;
@@ -45,6 +45,7 @@ class Finder extends EventEmitter {
       this.colorNumber === colors.length - 1 ? 0 : this.colorNumber + 1;
     console.log(chalk.keyword(colors[this.colorNumber])(fileName));
   }
+  // TODO: modify checkFileExtension to checkFileType
   checkFileExtension(file, requiredExtensions) {
     if (!requiredExtensions.length) {
       throw new Error("Please, pass at least one extension to search.");
@@ -57,6 +58,7 @@ class Finder extends EventEmitter {
   handleFile(filePath) {
     this.checked.files++;
 
+    // TODO: delete checkFileExtension method
     if (this.checkFileExtension(filePath, process.env.EXT)) {
       this.drawFileName(filePath, this.colors);
     }
@@ -74,6 +76,7 @@ class Finder extends EventEmitter {
       const currentPath = pathModule.resolve(path, name);
       const currentDeep = this.calcCurrentDeepness(currentPath);
 
+      // TODO: elem.name.includes change with REGEX  
       if (elem.isFile() && elem.name.includes(this.filter)) {
         this.emit("file", currentPath);
       }
@@ -94,6 +97,8 @@ class Finder extends EventEmitter {
     const dirElems = this.readDirectory(path);
     this.iterateDirectoryContent(dirElems, path);
   }
+  // TODO: create logMethod that creates logFile.txt with script running date 
+  //       in the name of that file and it must contain ALL CONSOLE OUPUT;
 }
 
 module.exports = Finder;

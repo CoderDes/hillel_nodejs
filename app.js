@@ -4,12 +4,11 @@ const { argv } = require("yargs");
 
 const Finder = require("./finder.js");
 
-const { colors = ["red", "green", "blue"], deep = 0, path, filter } = argv;
-const { EXT } = process.env;
+const { colors = ["red", "green", "blue"], deep = 0, path, search, name } = argv;
 
 const targetPath = pathModule.resolve(homedir(), path);
 
-const myFinder = new Finder(targetPath, deep, EXT, colors, filter);
+const myFinder = new Finder(targetPath, deep, colors, search, name);
 
 myFinder.once("started", () => {
   myFinder.parse(targetPath);
