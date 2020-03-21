@@ -4,20 +4,16 @@ const { homedir } = require("os");
 const EventEmitter = require("events");
 
 const chalk = require("chalk");
+const FileType = require("file-type");
 
 class Finder extends EventEmitter {
-  constructor(
-    dirPath = homedir(),
-    deep = 0,
-    colors = "green",
-    search,
-    name
-  ) {
+  constructor(dirPath = homedir(), deep = 0, colors = "green", search, name) {
     super();
     this.initialPath = dirPath;
     this.deep = deep;
     this.search = search;
     this.name = name;
+    this.regexp = this.convertNameToRegExp(name);
     this.colorNumber = 0;
     this.colors = JSON.parse(colors);
     this.timerId;
@@ -45,21 +41,25 @@ class Finder extends EventEmitter {
       this.colorNumber === colors.length - 1 ? 0 : this.colorNumber + 1;
     console.log(chalk.keyword(colors[this.colorNumber])(fileName));
   }
-  // TODO: modify checkFileExtension to checkFileType
-  checkFileExtension(file, requiredExtensions) {
-    if (!requiredExtensions.length) {
-      throw new Error("Please, pass at least one extension to search.");
-    }
-
-    const fileExt = pathModule.extname(file);
-
-    return requiredExtensions.includes(fileExt);
+  checkFileType(file) {
+    return FileType.fromFile(file)
+      .then(res => {
+        return (res && res.input) || pathModule.extname(file);
+      })
+      .then(ext => ext)
+      .catch(err => {
+        throw new Error(err.message);
+      });
   }
-  handleFile(filePath) {
+  async handleFile(filePath) {
     this.checked.files++;
 
-    // TODO: delete checkFileExtension method
-    if (this.checkFileExtension(filePath, process.env.EXT)) {
+    const fileType = await this.checkFileType(filePath);
+
+    if (
+      this.regexp.test(filePath) &&
+      fileType === pathModule.extname(this.name)
+    ) {
       this.drawFileName(filePath, this.colors);
     }
   }
@@ -70,14 +70,16 @@ class Finder extends EventEmitter {
       this.emit("finished");
     });
   }
+  convertNameToRegExp(name) {
+    return new RegExp("^" + name.replace("*", ".+") + "$");
+  }
   iterateDirectoryContent(elements, path) {
     elements.forEach(elem => {
       const { name } = elem;
       const currentPath = pathModule.resolve(path, name);
       const currentDeep = this.calcCurrentDeepness(currentPath);
 
-      // TODO: elem.name.includes change with REGEX  
-      if (elem.isFile() && elem.name.includes(this.filter)) {
+      if (elem.isFile()) {
         this.emit("file", currentPath);
       }
       if ((elem.isDirectory() && !this.deep) || currentDeep < this.deep) {
@@ -97,7 +99,7 @@ class Finder extends EventEmitter {
     const dirElems = this.readDirectory(path);
     this.iterateDirectoryContent(dirElems, path);
   }
-  // TODO: create logMethod that creates logFile.txt with script running date 
+  // TODO: create logMethod that creates logFile.txt with script running date
   //       in the name of that file and it must contain ALL CONSOLE OUPUT;
 }
 

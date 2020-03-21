@@ -28,5 +28,8 @@
     "chalk": "^3.0.0",
     "cross-env": "^7.0.0",
     "yargs": "^15.1.0"
+  },
+  "devDependencies": {
+    "file-type": "^14.1.4"
   }
 }
