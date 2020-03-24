@@ -5,9 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"green\", \"red\", \"cyan\"]' --path='Downloads'",
-    "hw1": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"yellow\", \"blue\", \"magenta\"]' --deep=0 --path='Downloads'",
-    "hw2": "cross-env EXT='[\".mp3\", \".acc\"]' node app.js --colors='[\"yellow\", \"blue\", \"magenta\"]' --deep=0 --path='Downloads' --filter='Tommy'"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -23,9 +21,5 @@
     "url": "https://github.com/EugZ/hillel_nodejs/issues"
   },
   "homepage": "https://github.com/EugZ/hillel_nodejs#readme",
-  "dependencies": {
-    "chalk": "^3.0.0",
-    "cross-env": "^7.0.0",
-    "yargs": "^15.1.0"
-  }
+  "dependencies": {}
 }
