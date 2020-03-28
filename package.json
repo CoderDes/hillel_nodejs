@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "nodemon app.js localhost 3001"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,11 @@
     "url": "https://github.com/EugZ/hillel_nodejs/issues"
   },
   "homepage": "https://github.com/EugZ/hillel_nodejs#readme",
-  "dependencies": {}
+  "dependencies": {
+    "file-type": "^14.1.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.2",
+    "osascript": "^1.2.0"
+  }
 }
