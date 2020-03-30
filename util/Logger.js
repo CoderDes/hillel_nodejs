@@ -1,4 +1,4 @@
-const { writeFileSync, appendFileSync } = require("fs");
+const { promises, createWriteStream, createReadStream } = require("fs");
 const { join } = require("path");
 
 const Timer = require("./Timer.js");
@@ -6,32 +6,31 @@ const Timer = require("./Timer.js");
 class Logger {
   timer = new Timer();
   // TODO: create a class of Observer and move observe logic there
+
+  #observeInterval;
+
   #logData = {
     timeLog: {
-      filename: join(__dirname, "..", "assets", "log-time.txt"),
+      filename: join(__dirname, "..", "log", "log-time.txt"),
       dataStart: "",
       dataEnd: "",
       spentTime: "",
-      metaData: ""
+      metaData: "",
+      summaryMessage: ""
     },
     observeLog: {
-      filename: join(__dirname, "..", "assets", "log-observe.txt"),
+      filename: join(__dirname, "..", "log", "log-observe.txt"),
       userAgents: new Set(),
       userAgentsList: "",
       requestsQuantity: 0,
       code: null,
-      status: null
+      status: null,
+      summaryMessage: ""
     },
     messageDelimeter: "\n\n"
   };
 
   logMode = "";
-
-  #observeInterval;
-
-  // TODO: move to #logData object
-  #timeLogMessage = "";
-  #observeLogMessage = "";
 
   generateLogMessage(response) {
     this.buildLogData();
@@ -99,7 +98,7 @@ class Logger {
         metaData,
         messageDelimeter
       } = data;
-      this.#timeLogMessage = String.prototype.concat(
+      this.#logData.timeLog.summaryMessage = String.prototype.concat(
         dataStart,
         dataEnd,
         spentTime,
@@ -115,7 +114,7 @@ class Logger {
         status,
         messageDelimeter
       } = data;
-      this.#observeLogMessage = String.prototype.concat(
+      this.#logData.observeLog.summaryMessage = String.prototype.concat(
         userAgentsList,
         requestsQuantity,
         code,
@@ -129,13 +128,32 @@ class Logger {
     this.#observeInterval = timeInMs;
   }
 
-  createLogFile(path) {
-    writeFileSync(path, "");
+  createLogFile() {
+    const path = this.logMode.includes("time")
+      ? this.#logData.timeLog.filename
+      : this.#logData.observeLog.filename;
+
+    promises.access(path).catch(err => {
+      console.log(`File ${path} doesn't exits. Create.`);
+      writeFileSync(path, "");
+    });
   }
 
   writeLog() {
-    appendFileSync(this.#logData.timeLog.filename, this.#timeLogMessage);
-    writeFileSync(this.#logData.observeLog.filename, this.#observeLogMessage);
+    const path = this.logMode.includes("time")
+      ? this.#logData.timeLog.filename
+      : this.#logData.observeLog.filename;
+    const data = this.logMode.includes("time")
+      ? this.#logData.timeLog.summaryMessage
+      : this.#logData.observeLog.summaryMessage;
+
+    const writeStream = createWriteStream(path);
+    writeStream.write(data);
+
+    promises
+      .appendFile(path, data)
+      .then(() => console.log("DATA LOGGED"))
+      .catch(err => console.error(err));
   }
 
   handleObserve() {
@@ -145,7 +163,7 @@ class Logger {
 
   initObserve(params) {
     console.log("INIT OBSERVER");
-    const { server } = params;
+    const { server, response } = params;
     this.createLogFile(this.#logData.observeLog.filename);
 
     server.on("request", reqData => {

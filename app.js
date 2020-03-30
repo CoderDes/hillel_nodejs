@@ -18,6 +18,9 @@ class Server {
         server: this.server,
         logger: this.logger
       };
+
+      this.logger.observeInterval = 5 * 1000;
+      this.logger.initObserve(this.#serverProps);
     });
 
     this.server.on("close", () => {
@@ -35,9 +38,6 @@ class Server {
     try {
       this.router.getServerData(this.#serverProps);
       this.router.run();
-
-      this.logger.observeInterval = 5 * 1000;
-      this.logger.initObserve(this.#serverProps);
     } catch (err) {
       throw new Error(err.message);
     }

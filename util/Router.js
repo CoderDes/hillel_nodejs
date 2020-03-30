@@ -1,120 +1,139 @@
-const { createReadStream, accessSync, appendFileSync } = require("fs");
+const { createReadStream, promises, appendFileSync } = require("fs");
 const { join, resolve } = require("path");
 
 const FileType = require("file-type");
 
 const { page, clientScriptPath } = require("../assets/pageString.js");
 
-// TODO: move routing logic here
-const Logger = require("./Logger");
-
 class Router {
   #assetsPathRegExp = new RegExp("^/assets", "i");
+  #messagesPathRegExp = new RegExp("^/messages", "i");
   #props;
+  #rootDir = join(__dirname, "..");
 
   getServerData(data) {
-    // console.log("SERVER DATA", data);
     this.#props = { ...data };
   }
 
   run() {
-    const { request } = this.#props;
+    const { request, response } = this.#props;
+
     if (!request) {
       return;
     }
-    // console.log("ROUTER PROPS", this.#props);
-    // console.log("REQUEST", this.#props.request);
-    this.handleMethod(this.#props.request);
+
+    this.handleMethod(request, response);
   }
 
-  handleMethod(request) {
+  handleMethod(request, response) {
     try {
       const { method } = request;
       switch (method) {
         case "GET":
-          console.log("CASE GET");
-          this.handleGet(request);
+          this.handleGet(request, response);
           break;
         case "POST":
-          this.handlePost(request);
+          this.handlePost(request, response);
           break;
         case "PUT":
-          this.handlePut(request);
+          this.handlePut(request, response);
           break;
         case "DELETE":
-          this.handleDelete(request);
+          this.handleDelete(request, response);
           break;
-        default:
-          this.handleError();
       }
     } catch (err) {
-      this.handleError(err, "Something wrong with request method.");
+      const { response } = this.#props;
+      const errData = {
+        err,
+        message: "Something wrong with request method.",
+        response
+      };
+      this.handleError(errData);
     }
   }
-  handleGet(request) {
+  handleGet(request, response) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
-    console.log("HANDLE GET");
+
     if (pathname === "/") {
-      console.log("ROOT IN HANDLE GET");
-      this.response.setHeader("Content-type", "text/html");
-      this.response.statusCode = 200;
-      this.response.statusMessage = "Success";
-      this.response.write(page);
-      this.response.end();
+      console.log("ROOT", pathname);
+      response.setHeader("Content-type", "text/html");
+      response.statusCode = 200;
+      response.statusMessage = "Success";
+      response.write(page);
+      response.on("finish", () => {
+        console.log("ROOT RESPONSE FINISHED");
+        response.end("THE END");
+      });
+      response.on("close", () => {
+        console.log("ROOT RESPONSE CLOSED");
+      });
       return;
     }
-
     if (this.#assetsPathRegExp.test(pathname)) {
-      const filePath = join(__dirname, pathname);
+      const filePath = join(this.#rootDir, pathname);
+      const { logger } = this.#props;
 
-      accessSync(filePath);
+      // TODO: refactor to async access
+      // accessSync(filePath);
+      promises
+        .access(filePath)
+        .then(() => {
+          const rs = createReadStream(filePath);
 
-      const rs = createReadStream(filePath);
+          rs.once("data", async chunk => {
+            const fileTypeData = await FileType.fromBuffer(chunk);
+            response.setHeader("Content-type", fileTypeData.mime);
+            response.statusCode = 200;
+            response.statusMessage = "Success";
+            response.write(chunk);
+            rs.pipe(response);
+          });
 
-      rs.once("data", async chunk => {
-        const fileTypeData = await FileType.fromBuffer(chunk);
-        response.setHeader("Content-type", fileTypeData.mime);
-        response.statusCode = 200;
-        response.statusMessage = "Success";
-        response.write(chunk);
-        rs.pipe(response);
-      });
+          rs.on("error", err => {
+            this.handleError(err, "Error. Possibly, such file doesn't exist.");
+          });
+          // TODO: check differences from 'close' and 'finish'
+          response.once("pipe", () => {
+            logger.logMode = "time";
+            logger.createLogFile();
+            logger.timer.startCount(new Date());
+          });
 
-      rs.on("error", err => {
-        this.handleError(err, "Error. Possibly, such file doesn't exist.");
-      });
-      // TODO: check differences from 'close' and 'finish'
-      this.response.once("pipe", () => {
-        logger.logMode = "time";
-        logger.createLogFile(join(__dirname, "assets", "log-time.txt"));
-        logger.timer.startCount(new Date());
-      });
+          response.once("unpipe", () => {
+            logger.timer.endCount(new Date());
+            response.end();
+          });
 
-      this.response.once("unpipe", () => {
-        logger.timer.endCount(new Date());
-        response.end();
-      });
+          response.on("close", () => {
+            // TODO: handle cases with closed responses
+            console.log("RESPONSE CLOSED");
+          });
 
-      this.response.on("close", () => {
-        console.log("RESPONSE CLOSED");
-        logger.generateLogMessage(response);
-        logger.logMode = "observe";
-      });
+          response.on("finish", () => {
+            console.log("RESPONSE FINISHED");
+            logger.generateLogMessage(response);
+            logger.logMode = "observe";
+            response.end();
+          });
+        })
+        .catch(err => {
+          console.dir(err);
+        });
       return;
     }
   }
   handlePost(request) {}
   handlePut(request) {}
   handleDelete(request) {}
-  handleError(err, responseMessage) {
-    console.log("ERROR", err);
-    // TODO write real statuses to response
-    // this.response.statusCode = code;
-    // this.response.statusMessage = status;
-    // this.response.write(`${message}.\n`)
-    // this.response.end();
-    // throw new Error(`Error: ${code}. ${message}`);
+  handleError(data) {
+    const { err, message, response } = data;
+
+    response.statusCode = 500;
+    response.end(`Error: ${message}`);
+
+    console.error(`ERROR: ${err.message}`);
   }
 }
 
