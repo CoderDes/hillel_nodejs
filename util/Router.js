@@ -64,11 +64,11 @@ class Router {
       response.write(page);
       response.on("finish", () => {
         console.log("ROOT RESPONSE FINISHED");
-        response.end("THE END");
       });
       response.on("close", () => {
         console.log("ROOT RESPONSE CLOSED");
       });
+      response.end("THE END");
       return;
     }
     if (this.#assetsPathRegExp.test(pathname)) {
