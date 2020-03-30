@@ -10,17 +10,29 @@ const Logger = require("./Logger");
 
 class Router {
   #assetsPathRegExp = new RegExp("^/assets", "i");
+  #props;
 
-  initialize(serverData) {
-    this.request = serverData.request;
-    this.response = serverData.response;
-    this.logger = serverData.logger;
+  getServerData(data) {
+    // console.log("SERVER DATA", data);
+    this.#props = { ...data };
   }
+
+  run() {
+    const { request } = this.#props;
+    if (!request) {
+      return;
+    }
+    // console.log("ROUTER PROPS", this.#props);
+    // console.log("REQUEST", this.#props.request);
+    this.handleMethod(this.#props.request);
+  }
+
   handleMethod(request) {
     try {
       const { method } = request;
       switch (method) {
         case "GET":
+          console.log("CASE GET");
           this.handleGet(request);
           break;
         case "POST":
@@ -42,8 +54,9 @@ class Router {
   handleGet(request) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
-
+    console.log("HANDLE GET");
     if (pathname === "/") {
+      console.log("ROOT IN HANDLE GET");
       this.response.setHeader("Content-type", "text/html");
       this.response.statusCode = 200;
       this.response.statusMessage = "Success";
@@ -71,7 +84,7 @@ class Router {
       rs.on("error", err => {
         this.handleError(err, "Error. Possibly, such file doesn't exist.");
       });
-
+      // TODO: check differences from 'close' and 'finish'
       this.response.once("pipe", () => {
         logger.logMode = "time";
         logger.createLogFile(join(__dirname, "assets", "log-time.txt"));
@@ -84,6 +97,7 @@ class Router {
       });
 
       this.response.on("close", () => {
+        console.log("RESPONSE CLOSED");
         logger.generateLogMessage(response);
         logger.logMode = "observe";
       });
