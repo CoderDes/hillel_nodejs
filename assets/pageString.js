@@ -1,7 +1,7 @@
 const path = require("path");
 
 const clientScript = path.join("client", "index.js");
-// TODO: add list of messages
+
 module.exports = {
   page: `
     <html>
@@ -10,12 +10,41 @@ module.exports = {
         <meta charset="utf-8" />
       </head>
       <body>
+        <template id="template">
+          <li class="message">
+            <time class="message__time"></time>
+            <p class="message__author"></p>
+            <p class="message__text"></p>
+          </li>
+        </template>
         <div id="root">
           <h1>Main page.</h1>
+          <ul class="messages"></ul>
+          <form action="/messages" method="post">
+            <label for="name">Your name: </label>
+            <br />
+            <input type="text" id="name" />
+            <br />
+            <textarea></textarea>
+            <br />
+            <button>
+              Send
+            </button>
+          </form>
         </div>
         <script src="/${clientScript}"></script>
       </body>
     </html>
   `,
-  clientScriptPath: clientScript
+  notFound: `
+  <html>
+    <head>
+      <title>Homework http module</title>
+      <meta charset="utf-8" />
+    </head>
+    <body>
+      <h1>Page not found. Sorry. Possibly, invalid URL.</h1>
+    </body>
+  </html>
+  `
 };

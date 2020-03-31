@@ -153,17 +153,19 @@ class Logger {
 
     promises
       .appendFile(path, data)
-      .then(() => console.log("DATA LOGGED"))
+      .then(() => {
+        // console.log("DATA LOGGED")
+      })
       .catch(err => console.error(err));
   }
 
   handleObserve() {
-    console.log("OBSERVE...");
+    // console.log("OBSERVE...");
     this.generateLogMessage();
   }
 
   initObserve(params) {
-    console.log("INIT OBSERVER");
+    // console.log("INIT OBSERVER");
     const { server, response } = params;
     this.createLogFile(this.#logData.observeLog.filename);
 

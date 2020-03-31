@@ -2,6 +2,7 @@ const http = require("http");
 
 const Logger = require("./util/Logger.js");
 const Router = require("./util/Router.js");
+const DBHandler = require("./util/DBHandler.js");
 
 class Server {
   #serverProps;
@@ -10,17 +11,20 @@ class Server {
     this.server = http.createServer(this.handleReqRes.bind(this));
     this.router = new Router();
     this.logger = new Logger();
+    this.db = new DBHandler();
   }
 
   initialize() {
     this.server.once("listening", () => {
       this.#serverProps = {
         server: this.server,
-        logger: this.logger
+        logger: this.logger,
+        db: this.db
       };
 
       this.logger.observeInterval = 5 * 1000;
       this.logger.initObserve(this.#serverProps);
+      this.db.createDB();
     });
 
     this.server.on("close", () => {

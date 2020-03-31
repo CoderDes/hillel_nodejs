@@ -1,9 +1,9 @@
-const { createReadStream, promises, appendFileSync } = require("fs");
+const { createReadStream, promises } = require("fs");
 const { join } = require("path");
 
 const FileType = require("file-type");
 
-const { page, clientScriptPath } = require("../assets/pageString.js");
+const { page, notFound } = require("../assets/pageString.js");
 
 class Router {
   #assetsPathRegExp = new RegExp("^/assets", "i");
@@ -63,15 +63,8 @@ class Router {
       response.statusCode = 200;
       response.statusMessage = "Success";
       response.write(page);
-      response.on("finish", () => {
-        console.log("ROOT RESPONSE FINISHED");
-      });
-      response.on("close", () => {
-        console.log("ROOT RESPONSE CLOSED");
-      });
-      response.end("THE END");
-    }
-    if (
+      response.end();
+    } else if (
       this.#assetsPathRegExp.test(pathname) ||
       this.#clientPathRegExp.test(pathname)
     ) {
@@ -99,7 +92,6 @@ class Router {
           rs.on("error", err => {
             this.handleError(err, "Error. Possibly, such file doesn't exist.");
           });
-          // TODO: check differences from 'close' and 'finish'
           response.once("pipe", () => {
             logger.logMode = "time";
             logger.createLogFile();
@@ -126,10 +118,23 @@ class Router {
         .catch(err => {
           console.dir(err);
         });
-      return;
+    } else {
+      response.setHeader("Content-type", "text/html");
+      response.statusCode = 404;
+      response.statusMessage = "Not Found.";
+      response.write(notFound);
+      response.end();
     }
   }
-  handlePost(request) {}
+  handlePost(request, response) {
+    console.log("POST");
+    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
+    const { pathname } = parsedUrl;
+
+    if (this.#messagesPathRegExp.test(pathname)) {
+      this.#props.db.createCollection("new");
+    }
+  }
   handlePut(request) {}
   handleDelete(request) {}
   handleError(data) {
