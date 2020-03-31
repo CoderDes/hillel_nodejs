@@ -1,5 +1,5 @@
 const { createReadStream, promises, appendFileSync } = require("fs");
-const { join, resolve } = require("path");
+const { join } = require("path");
 
 const FileType = require("file-type");
 
@@ -8,6 +8,7 @@ const { page, clientScriptPath } = require("../assets/pageString.js");
 class Router {
   #assetsPathRegExp = new RegExp("^/assets", "i");
   #messagesPathRegExp = new RegExp("^/messages", "i");
+  #clientPathRegExp = new RegExp("/client", "i");
   #props;
   #rootDir = join(__dirname, "..");
 
@@ -69,14 +70,14 @@ class Router {
         console.log("ROOT RESPONSE CLOSED");
       });
       response.end("THE END");
-      return;
     }
-    if (this.#assetsPathRegExp.test(pathname)) {
+    if (
+      this.#assetsPathRegExp.test(pathname) ||
+      this.#clientPathRegExp.test(pathname)
+    ) {
       const filePath = join(this.#rootDir, pathname);
       const { logger } = this.#props;
 
-      // TODO: refactor to async access
-      // accessSync(filePath);
       promises
         .access(filePath)
         .then(() => {
@@ -84,7 +85,11 @@ class Router {
 
           rs.once("data", async chunk => {
             const fileTypeData = await FileType.fromBuffer(chunk);
-            response.setHeader("Content-type", fileTypeData.mime);
+            if (fileTypeData) {
+              response.setHeader("Content-type", fileTypeData.mime);
+            } else {
+              response.setHeader("Content-type", "application/json");
+            }
             response.statusCode = 200;
             response.statusMessage = "Success";
             response.write(chunk);

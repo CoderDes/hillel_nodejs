@@ -1,7 +1,6 @@
 const path = require("path");
 
-const clientScript = path.join(__dirname, "client", "index.js");
-
+const clientScript = path.join("client", "index.js");
 // TODO: add list of messages
 module.exports = {
   page: `
@@ -14,7 +13,7 @@ module.exports = {
         <div id="root">
           <h1>Main page.</h1>
         </div>
-        <script src="${clientScript}"></script>
+        <script src="/${clientScript}"></script>
       </body>
     </html>
   `,

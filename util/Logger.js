@@ -36,6 +36,7 @@ class Logger {
     this.buildLogData();
     const data = this.formatLogData(response);
     this.concatMessageFromData(data);
+    // TODO: create log directory if it does not exist
     this.writeLog();
   }
 
