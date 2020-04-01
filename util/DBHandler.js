@@ -7,7 +7,7 @@ class DBHandler {
 
   createDB() {
     promises.access(this.#dbPath).catch(err => {
-      promises.writeFile(this.#dbPath);
+      promises.writeFile(this.#dbPath, JSON.stringify({ "": "" }));
     });
   }
   checkCollection(name) {
@@ -17,14 +17,8 @@ class DBHandler {
 
       rs.on("data", chunk => {
         db += chunk;
-        console.log("chunk", chunk);
-      });
-      rs.on("open", () => {
-        console.log("OLD READABLE OPENED");
       });
       rs.on("end", () => {
-        console.log("OLD READABLE END", db);
-        rs.destroy();
         db = JSON.parse(db);
         const isExist = name in db;
         resolve(isExist);
@@ -39,7 +33,6 @@ class DBHandler {
       ws.write(obj);
       ws.end();
       ws.on("end", () => {
-        console.log("EMPTY DATA WRITE END");
         resolve();
       });
     });
@@ -56,7 +49,7 @@ class DBHandler {
       }
       const currentDB = await promises.readFile(this.#dbPath);
       const parsedDB = JSON.parse(currentDB);
-      const updatedDB = Object.assign(parsedDB, { [name]: {} });
+      const updatedDB = Object.assign(parsedDB, { [name]: [] });
       await promises.writeFile(this.#dbPath, JSON.stringify(updatedDB));
     } catch (err) {
       throw new Error(err.message);
@@ -66,12 +59,34 @@ class DBHandler {
     return Math.random() * 1000;
   }
   readData(data) {}
-  writeData(data) {
-    const objToWrite = {};
-    objToWrite.id = this.generateId();
-    objToWrite[data.fieldName] = data.value;
+  writeData({ collection, data }) {
+    const { userName, comment } = data;
+    const newCollectionElem = {};
+    newCollectionElem.id = this.generateId();
+    newCollectionElem.userName = userName;
+    newCollectionElem.comment = comment;
+    // console.log("DATA TO ADD TO COLLECTION", newCollectionElem);
 
-    promises.access();
+    promises
+      .readFile(this.#dbPath)
+      .then(currentDB => {
+        currentDB = JSON.parse(currentDB);
+
+        // TODO: fix possible bug if collection is not an array;
+        const updatedCollection = [...currentDB[collection]];
+        updatedCollection.push(newCollectionElem);
+
+        const updatedDB = {};
+        updatedDB[collection] = updatedColleciton;
+
+        return promises.writeFile(
+          this.#dbPath,
+          JSON.stringify(Object.assign(currentDB, updatedDB))
+        );
+      })
+      .catch(err => {
+        throw new Error(err.message);
+      });
   }
   updateData(data) {}
   deleteData(data) {}

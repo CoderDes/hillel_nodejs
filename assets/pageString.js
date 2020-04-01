@@ -20,14 +20,14 @@ module.exports = {
         <div id="root">
           <h1>Main page.</h1>
           <ul class="messages"></ul>
-          <form action="/messages" method="post">
+          <form>
             <label for="name">Your name: </label>
             <br />
             <input type="text" id="name" />
             <br />
-            <textarea></textarea>
+            <textarea class="comment-field"></textarea>
             <br />
-            <button>
+            <button class="submit">
               Send
             </button>
           </form>

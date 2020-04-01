@@ -126,13 +126,27 @@ class Router {
       response.end();
     }
   }
-  handlePost(request, response) {
+  getRequestBody(request) {
+    return new Promise((resolve, reject) => {
+      let body = "";
+      request.on("data", chunk => {
+        console.log("REQ DATA", chunk);
+        body += chunk;
+      });
+      request.on("end", () => {
+        resolve(JSON.parse(body));
+      });
+    });
+  }
+  async handlePost(request, response) {
     console.log("POST");
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
     if (this.#messagesPathRegExp.test(pathname)) {
-      this.#props.db.createCollection("new");
+      await this.#props.db.createCollection("messages");
+      const body = await this.getRequestBody(request);
+      this.#props.db.writeData({ collection: "messages", data: body });
     }
   }
   handlePut(request) {}
