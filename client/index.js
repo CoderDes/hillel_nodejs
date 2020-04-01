@@ -14,6 +14,7 @@ class MessageHandler {
   }
   initialize() {
     this.fetchAllMessages();
+    // TODO: навесить слушатели на все дом-элементы
   }
 }
 
