@@ -157,7 +157,6 @@ class Router {
     }
   }
   async handlePut(request, response) {
-    console.log("PUT");
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
@@ -167,14 +166,30 @@ class Router {
         collection: "messages",
         data: body
       });
-      console.log("RESPONSE MESSAGE", responseMessage);
+
       response.setHeader("Content-type", "text/html");
       response.statusCode = 200;
       response.statusMessage = responseMessage;
       response.end();
     }
   }
-  handleDelete(request, response) {}
+  async handleDelete(request, response) {
+    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
+    const { pathname } = parsedUrl;
+
+    if (this.#messagesPathRegExp.test(pathname)) {
+      const body = await this.getRequestBody(request);
+      const responseMessage = await this.#props.db.deleteData({
+        collection: "messages",
+        data: body
+      });
+
+      response.setHeader("Content-type", "text/html");
+      response.statusCode = 200;
+      response.statusMessage = responseMessage;
+      response.end();
+    }
+  }
   handleError(data) {
     const { err, message, response } = data;
 

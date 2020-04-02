@@ -36,7 +36,7 @@ class MessageHandler {
     formData.comment = this.textarea.value;
     return formData;
   }
-  updateSingleMessage(messageData) {
+  updateMessage(messageData) {
     fetch(this.url, {
       method: "PUT",
       headers: {
@@ -100,7 +100,7 @@ class MessageHandler {
       event.preventDefault();
       comment.textContent = textArea.textContent;
       updatedData.comment = comment.textContent;
-      self.updateSingleMessage(updatedData);
+      self.updateMessage(updatedData);
       cleanUp();
     }
     function cleanUp() {
@@ -110,7 +110,21 @@ class MessageHandler {
       messageElem.removeChild(textArea);
     }
   }
-  deleteMessage(messageData) {}
+  deleteMessage({ messageElem, data }) {
+    messageElem.parentElement.removeChild(messageElem);
+
+    fetch(this.url, {
+      method: "DELETE",
+      headers: {
+        "Content-type": "application/json"
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        console.log(response);
+      })
+      .catch(error => console.error(error));
+  }
   renderMessages(messageData) {
     // TODO: create element with DOM API instead of innerHTML
     messageData.forEach(message => {

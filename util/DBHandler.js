@@ -125,13 +125,39 @@ class DBHandler {
               JSON.stringify(Object.assign(currentDB, updatedDB))
             )
             .then(() => {
-              resolve("Database updated.");
+              resolve("Message edited.");
             })
             .catch(err => console.error(err));
         });
     });
   }
-  deleteData(data) {}
+  deleteData({ collection, data }) {
+    const { id } = data;
+
+    return new Promise((resolve, reject) => {
+      return promises
+        .readFile(this.#dbPath, { encoding: "utf-8" })
+        .then(data => {
+          const currentDB = JSON.parse(data);
+          const updatedCollection = currentDB[collection].filter(
+            elem => +elem.id !== +id
+          );
+
+          const updatedDB = {};
+          updatedDB[collection] = updatedCollection;
+
+          promises
+            .writeFile(
+              this.#dbPath,
+              JSON.stringify(Object.assign(currentDB, updatedDB))
+            )
+            .then(() => {
+              resolve("Message deleted.");
+            })
+            .catch(err => console.error(err));
+        });
+    });
+  }
 }
 
 module.exports = DBHandler;
