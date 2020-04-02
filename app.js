@@ -31,7 +31,7 @@ class Server {
       this.logger.removeObserve();
     });
 
-    this.server.listen(3003, "localhost", () => {
+    this.server.listen(3000, "localhost", () => {
       console.log("SERVER IS RUNNING.");
     });
   }

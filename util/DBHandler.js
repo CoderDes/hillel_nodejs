@@ -58,14 +58,29 @@ class DBHandler {
   generateId() {
     return Math.random() * 1000;
   }
-  readData(data) {}
+  readData({ collection, id }) {
+    return new Promise((resolve, reject) => {
+      if (id === "all") {
+        let db = "";
+        const rs = createReadStream(this.#dbPath);
+        rs.on("data", chunk => {
+          db += chunk;
+        });
+        rs.on("end", () => {
+          // const collectionToGive = JSON.parse(db)[collection];
+          // console.log("!!!!!!", collectionToGive);
+          resolve(JSON.parse(db)[collection]);
+        });
+        return;
+      }
+    });
+  }
   writeData({ collection, data }) {
     const { userName, comment } = data;
     const newCollectionElem = {};
     newCollectionElem.id = this.generateId();
     newCollectionElem.userName = userName;
     newCollectionElem.comment = comment;
-    // console.log("DATA TO ADD TO COLLECTION", newCollectionElem);
 
     promises
       .readFile(this.#dbPath)
@@ -77,8 +92,7 @@ class DBHandler {
         updatedCollection.push(newCollectionElem);
 
         const updatedDB = {};
-        updatedDB[collection] = updatedColleciton;
-
+        updatedDB[collection] = updatedCollection;
         return promises.writeFile(
           this.#dbPath,
           JSON.stringify(Object.assign(currentDB, updatedDB))
@@ -88,7 +102,35 @@ class DBHandler {
         throw new Error(err.message);
       });
   }
-  updateData(data) {}
+  updateData({ collection, data }) {
+    const { id, userName, comment } = data;
+    return new Promise((resolve, reject) => {
+      return promises
+        .readFile(this.#dbPath, { encoding: "utf-8" })
+        .then(data => {
+          const currentDB = JSON.parse(data);
+          const oldElem = currentDB[collection].find(elem => +elem.id === +id);
+          const newElem = Object.assign(oldElem, { id, userName, comment });
+          const updatedCollection = currentDB[collection].filter(
+            elem => +elem.id !== +oldElem.id
+          );
+          updatedCollection.push(newElem);
+
+          const updatedDB = {};
+          updatedDB[collection] = updatedCollection;
+
+          promises
+            .writeFile(
+              this.#dbPath,
+              JSON.stringify(Object.assign(currentDB, updatedDB))
+            )
+            .then(() => {
+              resolve("Database updated.");
+            })
+            .catch(err => console.error(err));
+        });
+    });
+  }
   deleteData(data) {}
 }
 

@@ -53,12 +53,11 @@ class Router {
       this.handleError(errData);
     }
   }
-  handleGet(request, response) {
+  async handleGet(request, response) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
     if (pathname === "/") {
-      console.log("ROOT", pathname);
       response.setHeader("Content-type", "text/html");
       response.statusCode = 200;
       response.statusMessage = "Success";
@@ -118,6 +117,16 @@ class Router {
         .catch(err => {
           console.dir(err);
         });
+    } else if (this.#messagesPathRegExp) {
+      const data = await this.#props.db.readData({
+        collection: "messages",
+        id: "all"
+      });
+      response.setHeader("Content-type", "application/json");
+      response.statusCode = 200;
+      response.statusMessage = "Success";
+      response.write(JSON.stringify(data));
+      response.end();
     } else {
       response.setHeader("Content-type", "text/html");
       response.statusCode = 404;
@@ -130,7 +139,6 @@ class Router {
     return new Promise((resolve, reject) => {
       let body = "";
       request.on("data", chunk => {
-        console.log("REQ DATA", chunk);
         body += chunk;
       });
       request.on("end", () => {
@@ -139,7 +147,6 @@ class Router {
     });
   }
   async handlePost(request, response) {
-    console.log("POST");
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
@@ -149,8 +156,25 @@ class Router {
       this.#props.db.writeData({ collection: "messages", data: body });
     }
   }
-  handlePut(request) {}
-  handleDelete(request) {}
+  async handlePut(request, response) {
+    console.log("PUT");
+    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
+    const { pathname } = parsedUrl;
+
+    if (this.#messagesPathRegExp.test(pathname)) {
+      const body = await this.getRequestBody(request);
+      const responseMessage = await this.#props.db.updateData({
+        collection: "messages",
+        data: body
+      });
+      console.log("RESPONSE MESSAGE", responseMessage);
+      response.setHeader("Content-type", "text/html");
+      response.statusCode = 200;
+      response.statusMessage = responseMessage;
+      response.end();
+    }
+  }
+  handleDelete(request, response) {}
   handleError(data) {
     const { err, message, response } = data;
 
