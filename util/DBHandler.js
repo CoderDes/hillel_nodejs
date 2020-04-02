@@ -67,8 +67,6 @@ class DBHandler {
           db += chunk;
         });
         rs.on("end", () => {
-          // const collectionToGive = JSON.parse(db)[collection];
-          // console.log("!!!!!!", collectionToGive);
           resolve(JSON.parse(db)[collection]);
         });
         return;

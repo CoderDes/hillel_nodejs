@@ -10,13 +10,6 @@ module.exports = {
         <meta charset="utf-8" />
       </head>
       <body>
-        <template id="template">
-          <li class="message">
-            <time class="message__time"></time>
-            <p class="message__author"></p>
-            <p class="message__text"></p>
-          </li>
-        </template>
         <div id="root">
           <h1>Main page.</h1>
           <ul class="messages"></ul>
@@ -28,7 +21,7 @@ module.exports = {
             <textarea class="comment-field"></textarea>
             <br />
             <button class="submit">
-              Send
+              Post
             </button>
           </form>
         </div>

@@ -12,7 +12,6 @@ class MessageHandler {
   userName = document.getElementById("name");
   textarea = document.querySelector(".comment-field");
   submitBtn = document.querySelector(".submit");
-  submitMode = "";
   url = "http://localhost:3000/messages";
 
   submitNewMessage() {
@@ -25,8 +24,15 @@ class MessageHandler {
       },
       body: JSON.stringify(data)
     })
+      .then(() => {
+        return fetch(this.url);
+      })
       .then(response => {
-        console.log("RESPONSE FROM SERVER", response);
+        return response.json();
+      })
+      .then(data => {
+        // TODO: implement rendering single message, not all
+        this.renderMessages(data);
       })
       .catch(err => console.error(err));
   }
@@ -126,6 +132,7 @@ class MessageHandler {
       .catch(error => console.error(error));
   }
   renderMessages(messageData) {
+    this.messageList.innerHTML = "";
     // TODO: create element with DOM API instead of innerHTML
     messageData.forEach(message => {
       const listItem = `

@@ -122,6 +122,8 @@ class Router {
         collection: "messages",
         id: "all"
       });
+
+      console.log("GET MESSAGES");
       response.setHeader("Content-type", "application/json");
       response.statusCode = 200;
       response.statusMessage = "Success";
@@ -154,6 +156,11 @@ class Router {
       await this.#props.db.createCollection("messages");
       const body = await this.getRequestBody(request);
       this.#props.db.writeData({ collection: "messages", data: body });
+
+      response.setHeader("Content-type", "text/html");
+      response.statusCode = 200;
+      response.statusMessage = "Post saved.";
+      response.end();
     }
   }
   async handlePut(request, response) {
