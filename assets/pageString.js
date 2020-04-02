@@ -8,23 +8,26 @@ module.exports = {
       <head>
         <title>Homework http module</title>
         <meta charset="utf-8" />
+        <link rel="stylesheet" href="/client/style.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" />
       </head>
       <body>
-        <div id="root">
-          <h1>Main page.</h1>
+        <header>
+          <h1 class="title">Simple chat</h1>
+        </header>
+        <main class="chat">
           <ul class="messages"></ul>
-          <form>
-            <label for="name">Your name: </label>
-            <br />
-            <input type="text" id="name" />
-            <br />
+          <form class="form">
+            <div class="form__wrapper">
+              <label for="name" class="form__label">Your name: </label>
+              <input type="text" id="name" class="form__nickname"/>
+            </div>
             <textarea class="comment-field"></textarea>
-            <br />
-            <button class="submit">
+            <button class="submit button">
               Post
             </button>
           </form>
-        </div>
+        </main>
         <script src="/${clientScript}"></script>
       </body>
     </html>

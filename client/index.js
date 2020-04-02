@@ -93,6 +93,7 @@ class MessageHandler {
     textArea.addEventListener("keyup", onPrint);
 
     saveBtn.textContent = "Save";
+    saveBtn.classList.add("message__button", "button");
     saveBtn.addEventListener("click", onSave);
 
     messageElem.insertBefore(textArea, btnSection);
@@ -143,8 +144,8 @@ class MessageHandler {
           <p class="message__author">Username: ${message.userName}</p>
           <p class="message__comment">Comment: <br /> ${message.comment}</p>
           <div class="message__buttons">
-            <button class="message__edit">Edit</button>
-            <button class="message__delete">Delete</button>
+            <button class="message__edit message__button button">Edit</button>
+            <button class="message__delete message__button button">Delete</button>
           </div>
         </li>
       `;
