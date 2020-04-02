@@ -1,4 +1,9 @@
-const { promises, createWriteStream, createReadStream } = require("fs");
+const {
+  promises,
+  createWriteStream,
+  createReadStream,
+  writeFileSync
+} = require("fs");
 const { join } = require("path");
 
 const Timer = require("./Timer.js");
@@ -33,11 +38,14 @@ class Logger {
   logMode = "";
 
   generateLogMessage(response) {
-    this.buildLogData();
-    const data = this.formatLogData(response);
-    this.concatMessageFromData(data);
-    // TODO: create log directory if it does not exist
-    this.writeLog();
+    try {
+      this.buildLogData();
+      const data = this.formatLogData(response);
+      this.concatMessageFromData(data);
+      this.writeLog();
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
 
   buildLogData() {
@@ -129,15 +137,32 @@ class Logger {
     this.#observeInterval = timeInMs;
   }
 
+  createDirIfNotExist(path) {
+    return promises
+      .access(path)
+      .catch(err => {
+        console.log("Creating log directory...");
+        return promises.mkdir(path);
+      })
+      .then(() => {
+        console.log(`Log directory created: ${path}`);
+      })
+      .catch(err => console.error(err));
+  }
+
   createLogFile() {
     const path = this.logMode.includes("time")
       ? this.#logData.timeLog.filename
       : this.#logData.observeLog.filename;
 
-    promises.access(path).catch(err => {
-      console.log(`File ${path} doesn't exits. Create.`);
-      writeFileSync(path, "");
-    });
+    this.createDirIfNotExist(join(__dirname, "..", "log"))
+      .then(() => {
+        return promises.access(path);
+      })
+      .catch(err => {
+        console.log(`File ${path} doesn't exits. Create.`);
+        writeFileSync(path, "");
+      });
   }
 
   writeLog() {
