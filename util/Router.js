@@ -122,8 +122,6 @@ class Router {
         collection: "messages",
         id: "all"
       });
-
-      console.log("GET MESSAGES");
       response.setHeader("Content-type", "application/json");
       response.statusCode = 200;
       response.statusMessage = "Success";
