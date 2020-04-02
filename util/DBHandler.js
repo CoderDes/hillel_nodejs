@@ -29,7 +29,7 @@ class DBHandler {
     return new Promise((resolve, reject) => {
       const ws = createWriteStream(this.#dbPath);
       const obj = JSON.stringify({ dump: "dump" });
-      console.log("LOL", typeof obj);
+
       ws.write(obj);
       ws.end();
       ws.on("end", () => {

@@ -144,9 +144,6 @@ class Logger {
         console.log("Creating log directory...");
         return promises.mkdir(path);
       })
-      .then(() => {
-        console.log(`Log directory created: ${path}`);
-      })
       .catch(err => console.error(err));
   }
 
@@ -173,24 +170,19 @@ class Logger {
       ? this.#logData.timeLog.summaryMessage
       : this.#logData.observeLog.summaryMessage;
 
-    const writeStream = createWriteStream(path);
-    writeStream.write(data);
-
-    promises
-      .appendFile(path, data)
-      .then(() => {
-        // console.log("DATA LOGGED")
-      })
-      .catch(err => console.error(err));
+    if (this.logMode.includes("time")) {
+      promises.appendFile(path, data).catch(err => console.error(err));
+    } else {
+      const ws = createWriteStream(path);
+      ws.write(data);
+    }
   }
 
   handleObserve() {
-    // console.log("OBSERVE...");
     this.generateLogMessage();
   }
 
   initObserve(params) {
-    // console.log("INIT OBSERVER");
     const { server, response } = params;
     this.createLogFile(this.#logData.observeLog.filename);
 

@@ -49,11 +49,7 @@ class MessageHandler {
         "Content-type": "application/json"
       },
       body: JSON.stringify(messageData)
-    })
-      .then(response => {
-        console.log(response);
-      })
-      .catch(error => console.error(error));
+    }).catch(error => console.error(error));
   }
   fetchAllMessages() {
     fetch("http://localhost:3000/messages")
@@ -126,11 +122,7 @@ class MessageHandler {
         "Content-type": "application/json"
       },
       body: JSON.stringify(data)
-    })
-      .then(response => {
-        console.log(response);
-      })
-      .catch(error => console.error(error));
+    }).catch(error => console.error(error));
   }
   renderMessages(messageData) {
     this.messageList.innerHTML = "";

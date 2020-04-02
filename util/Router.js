@@ -104,11 +104,10 @@ class Router {
 
           response.on("close", () => {
             // TODO: handle cases with closed responses
-            console.log("RESPONSE CLOSED");
+            // console.log("RESPONSE CLOSED");
           });
 
           response.on("finish", () => {
-            console.log("RESPONSE FINISHED");
             logger.generateLogMessage(response);
             logger.logMode = "observe";
             response.end();
