@@ -6,11 +6,17 @@ const FileType = require("file-type");
 const { page, notFound } = require("../assets/pageString.js");
 
 class Router {
-  #assetsPathRegExp = new RegExp("^/assets", "i");
-  #messagesPathRegExp = new RegExp("^/messages", "i");
-  #clientPathRegExp = new RegExp("/client", "i");
+  #path = {
+    rootDir: join(__dirname, ".."),
+    assetsPathRegExp: new RegExp("^/assets", "i"),
+    messagesPathRegExp: new RegExp("^/messages", "i"),
+    clientPathRegExp: new RegExp("/client", "i")
+  };
+  // #assetsPathRegExp = new RegExp("^/assets", "i");
+  // #messagesPathRegExp = new RegExp("^/messages", "i");
+  // #clientPathRegExp = new RegExp("/client", "i");
   #props;
-  #rootDir = join(__dirname, "..");
+  // #rootDir = join(__dirname, "..");
 
   getServerData(data) {
     this.#props = { ...data };
@@ -64,10 +70,10 @@ class Router {
       response.write(page);
       response.end();
     } else if (
-      this.#assetsPathRegExp.test(pathname) ||
-      this.#clientPathRegExp.test(pathname)
+      this.#path.assetsPathRegExp.test(pathname) ||
+      this.#path.clientPathRegExp.test(pathname)
     ) {
-      const filePath = join(this.#rootDir, pathname);
+      const filePath = join(this.#path.rootDir, pathname);
       const { logger } = this.#props;
 
       promises
@@ -116,7 +122,7 @@ class Router {
         .catch(err => {
           console.dir(err);
         });
-    } else if (this.#messagesPathRegExp) {
+    } else if (this.#path.messagesPathRegExp.test(pathname)) {
       const data = await this.#props.db.readData({
         collection: "messages",
         id: "all"
@@ -149,7 +155,7 @@ class Router {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
-    if (this.#messagesPathRegExp.test(pathname)) {
+    if (this.#path.messagesPathRegExp.test(pathname)) {
       await this.#props.db.createCollection("messages");
       const body = await this.getRequestBody(request);
       this.#props.db.writeData({ collection: "messages", data: body });
@@ -164,7 +170,7 @@ class Router {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
-    if (this.#messagesPathRegExp.test(pathname)) {
+    if (this.#path.messagesPathRegExp.test(pathname)) {
       const body = await this.getRequestBody(request);
       const responseMessage = await this.#props.db.updateData({
         collection: "messages",
@@ -181,7 +187,7 @@ class Router {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
-    if (this.#messagesPathRegExp.test(pathname)) {
+    if (this.#path.messagesPathRegExp.test(pathname)) {
       const body = await this.getRequestBody(request);
       const responseMessage = await this.#props.db.deleteData({
         collection: "messages",

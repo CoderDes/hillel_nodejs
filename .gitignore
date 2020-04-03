@@ -1,4 +1,4 @@
 node_modules
 log
 assets
-db.json
+/db.json
