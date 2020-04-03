@@ -49,7 +49,18 @@ class MessageHandler {
         "Content-type": "application/json"
       },
       body: JSON.stringify(messageData)
-    }).catch(error => console.error(error));
+    })
+      .then(() => {
+        return fetch(this.url);
+      })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        // TODO: implement rendering single message, not all
+        this.renderMessages(data);
+      })
+      .catch(error => console.error(error));
   }
   fetchAllMessages() {
     fetch("http://localhost:3000/messages")
@@ -85,8 +96,7 @@ class MessageHandler {
     }
 
     textArea.classList.add("message__textarea-edit");
-    textArea.textContent = data.comment;
-    textArea.addEventListener("keyup", onPrint);
+    textArea.value = data.comment;
 
     saveBtn.textContent = "Save";
     saveBtn.classList.add("message__button", "button");
@@ -95,20 +105,16 @@ class MessageHandler {
     messageElem.insertBefore(textArea, btnSection);
     btnSection.appendChild(saveBtn);
 
-    function onPrint(event) {
-      textArea.textContent += event.key;
-    }
     function onSave(event) {
       const updatedData = { ...data };
       event.preventDefault();
-      comment.textContent = textArea.textContent;
+      comment.textContent = textArea.value;
       updatedData.comment = comment.textContent;
       self.updateMessage(updatedData);
       cleanUp();
     }
     function cleanUp() {
       saveBtn.removeEventListener("click", onSave);
-      textArea.removeEventListener("keyup", onPrint);
       btnSection.removeChild(saveBtn);
       messageElem.removeChild(textArea);
     }
@@ -154,8 +160,7 @@ class MessageHandler {
       if (target.classList.contains("message__edit")) {
         const message = getParentElementWithClass(event.target, "message");
         const originalMessageData = this.retrieveDataFromMessage(message);
-        // TODO: fix bug here with original comment. It does not change IN TEXTAREA after editing
-        // console.log("INTIAL COMMENT", originalMessageData);
+
         this.editMessage({ messageElem: message, data: originalMessageData });
       }
       if (target.classList.contains("message__delete")) {
