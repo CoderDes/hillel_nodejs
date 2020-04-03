@@ -183,7 +183,7 @@ class Logger {
   }
 
   initObserve(params) {
-    const { server, response } = params;
+    const { server } = params;
     this.createLogFile(this.#logData.observeLog.filename);
 
     server.on("request", reqData => {

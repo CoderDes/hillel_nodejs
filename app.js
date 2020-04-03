@@ -23,6 +23,7 @@ class Server {
       };
 
       this.logger.observeInterval = 5 * 1000;
+      this.logger.logMode = "observe";
       this.logger.initObserve(this.#serverProps);
       this.db.createDB();
     });
