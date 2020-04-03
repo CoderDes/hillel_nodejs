@@ -17,12 +17,27 @@ class ResponseHandler {
   sendResponseWithFile(filePath, props) {
     const { logger } = props;
 
+    const errorListener = err => {
+      this.handleError(err, "Error. Possibly, such file doesn't exist.");
+    };
+
+    const pipeListener = () => {
+      logger.timer.endCount(new Date());
+      this.response.end();
+    };
+
+    const unpipeListener = () => {
+      logger.logMode = "time";
+      logger.createLogFile();
+      logger.timer.startCount(new Date());
+    };
+
     promises
       .access(filePath)
       .then(() => {
         const rs = createReadStream(filePath);
-        // TODO: implement listener cleanup
-        rs.once("data", async chunk => {
+
+        const firstDataChunk = async chunk => {
           const fileTypeData = await FileType.fromBuffer(chunk);
           if (fileTypeData) {
             this.response.setHeader("Content-type", fileTypeData.mime);
@@ -34,35 +49,28 @@ class ResponseHandler {
           this.response.statusMessage = "Success";
           this.response.write(chunk);
           rs.pipe(this.response);
-        });
+        };
 
-        rs.on("error", err => {
-          this.handleError(err, "Error. Possibly, such file doesn't exist.");
-        });
-        this.response.once("pipe", () => {
-          logger.logMode = "time";
-          logger.createLogFile();
-          logger.timer.startCount(new Date());
-        });
+        const listenersCleanup = () => {
+          rs.off("data", firstDataChunk);
+          rs.off("error", errorListener);
+          this.response.off("pipe", pipeListener);
+          this.response.off("unpipe", unpipeListener);
+        };
 
-        this.response.once("unpipe", () => {
-          logger.timer.endCount(new Date());
-          this.response.end();
-        });
-
-        this.response.on("close", () => {
-          // TODO: handle cases with closed responses
-          // console.log("RESPONSE CLOSED");
-        });
-
+        rs.once("data", firstDataChunk);
+        rs.on("error", errorListener);
+        this.response.once("pipe", pipeListener);
+        this.response.once("unpipe", unpipeListener);
         this.response.on("finish", () => {
           logger.generateLogMessage(this.response);
           logger.logMode = "observe";
           this.response.end();
+          listenersCleanup();
         });
       })
       .catch(err => {
-        console.dir(err);
+        this.sendResponseWithError(500, err);
       });
   }
   sendResponseWithText(statusCode, statusMessage, textMessage) {
