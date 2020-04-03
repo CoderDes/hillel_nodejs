@@ -1,8 +1,7 @@
 const { createReadStream, promises } = require("fs");
 const { join } = require("path");
 
-const FileType = require("file-type");
-
+const ResponseHandler = require("./ResponseHandler.js");
 const { page, notFound } = require("../assets/pageString.js");
 
 class Router {
@@ -12,11 +11,9 @@ class Router {
     messagesPathRegExp: new RegExp("^/messages", "i"),
     clientPathRegExp: new RegExp("/client", "i")
   };
-  // #assetsPathRegExp = new RegExp("^/assets", "i");
-  // #messagesPathRegExp = new RegExp("^/messages", "i");
-  // #clientPathRegExp = new RegExp("/client", "i");
   #props;
-  // #rootDir = join(__dirname, "..");
+
+  #responseHandler;
 
   getServerData(data) {
     this.#props = { ...data };
@@ -28,6 +25,8 @@ class Router {
     if (!request) {
       return;
     }
+
+    this.#responseHandler = new ResponseHandler(response);
 
     this.handleMethod(request, response);
   }
@@ -60,84 +59,26 @@ class Router {
     }
   }
   async handleGet(request, response) {
+    // TODO: move to separate function getPathname
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
     if (pathname === "/") {
-      response.setHeader("Content-type", "text/html");
-      response.statusCode = 200;
-      response.statusMessage = "Success";
-      response.write(page);
-      response.end();
+      this.#responseHandler.sendResponseWithPage(200, "Success", page);
     } else if (
       this.#path.assetsPathRegExp.test(pathname) ||
       this.#path.clientPathRegExp.test(pathname)
     ) {
       const filePath = join(this.#path.rootDir, pathname);
-      const { logger } = this.#props;
-
-      promises
-        .access(filePath)
-        .then(() => {
-          const rs = createReadStream(filePath);
-
-          rs.once("data", async chunk => {
-            const fileTypeData = await FileType.fromBuffer(chunk);
-            if (fileTypeData) {
-              response.setHeader("Content-type", fileTypeData.mime);
-            } else {
-              response.setHeader("Content-type", "application/json");
-            }
-            response.statusCode = 200;
-            response.statusMessage = "Success";
-            response.write(chunk);
-            rs.pipe(response);
-          });
-
-          rs.on("error", err => {
-            this.handleError(err, "Error. Possibly, such file doesn't exist.");
-          });
-          response.once("pipe", () => {
-            logger.logMode = "time";
-            logger.createLogFile();
-            logger.timer.startCount(new Date());
-          });
-
-          response.once("unpipe", () => {
-            logger.timer.endCount(new Date());
-            response.end();
-          });
-
-          response.on("close", () => {
-            // TODO: handle cases with closed responses
-            // console.log("RESPONSE CLOSED");
-          });
-
-          response.on("finish", () => {
-            logger.generateLogMessage(response);
-            logger.logMode = "observe";
-            response.end();
-          });
-        })
-        .catch(err => {
-          console.dir(err);
-        });
+      this.#responseHandler.sendResponseWithFile(filePath, this.#props);
     } else if (this.#path.messagesPathRegExp.test(pathname)) {
       const data = await this.#props.db.readData({
         collection: "messages",
         id: "all"
       });
-      response.setHeader("Content-type", "application/json");
-      response.statusCode = 200;
-      response.statusMessage = "Success";
-      response.write(JSON.stringify(data));
-      response.end();
+      this.#responseHandler.sendResponseWithJson(200, "Success", data);
     } else {
-      response.setHeader("Content-type", "text/html");
-      response.statusCode = 404;
-      response.statusMessage = "Not Found.";
-      response.write(notFound);
-      response.end();
+      this.#responseHandler.sendResponseWithPage(404, "Not Found.", notFound);
     }
   }
   getRequestBody(request) {
@@ -151,22 +92,27 @@ class Router {
       });
     });
   }
-  async handlePost(request, response) {
+  async handlePost(request) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
     if (this.#path.messagesPathRegExp.test(pathname)) {
       await this.#props.db.createCollection("messages");
-      const body = await this.getRequestBody(request);
-      this.#props.db.writeData({ collection: "messages", data: body });
 
-      response.setHeader("Content-type", "text/html");
-      response.statusCode = 200;
-      response.statusMessage = "Post saved.";
-      response.end();
+      const body = await this.getRequestBody(request);
+      const responseMessage = await this.#props.db.writeData({
+        collection: "messages",
+        data: body
+      });
+
+      this.#responseHandler.sendResponseWithText(
+        200,
+        "Success",
+        responseMessage
+      );
     }
   }
-  async handlePut(request, response) {
+  async handlePut(request) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
@@ -177,13 +123,14 @@ class Router {
         data: body
       });
 
-      response.setHeader("Content-type", "text/html");
-      response.statusCode = 200;
-      response.statusMessage = responseMessage;
-      response.end();
+      this.#responseHandler.sendResponseWithText(
+        200,
+        "Success",
+        responseMessage
+      );
     }
   }
-  async handleDelete(request, response) {
+  async handleDelete(request) {
     const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
     const { pathname } = parsedUrl;
 
@@ -194,17 +141,21 @@ class Router {
         data: body
       });
 
-      response.setHeader("Content-type", "text/html");
-      response.statusCode = 200;
-      response.statusMessage = responseMessage;
-      response.end();
+      this.#responseHandler.sendResponseWithText(
+        200,
+        "Success",
+        responseMessage
+      );
     }
   }
   handleError(data) {
-    const { err, message, response } = data;
+    const { err } = data;
 
-    response.statusCode = 500;
-    response.end(`Error: ${message}`);
+    this.#responseHandler.sendResponseWithError(
+      500,
+      "Internal error.",
+      `ERROR: ${err.message}`
+    );
 
     console.error(`ERROR: ${err.message}`);
   }

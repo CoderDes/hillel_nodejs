@@ -80,25 +80,30 @@ class DBHandler {
     newCollectionElem.userName = userName;
     newCollectionElem.comment = comment;
 
-    promises
-      .readFile(this.#dbPath)
-      .then(currentDB => {
-        currentDB = JSON.parse(currentDB);
+    return new Promise((resolve, reject) => {
+      return promises
+        .readFile(this.#dbPath)
+        .then(currentDB => {
+          currentDB = JSON.parse(currentDB);
 
-        // TODO: fix possible bug if collection is not an array;
-        const updatedCollection = [...currentDB[collection]];
-        updatedCollection.push(newCollectionElem);
+          // TODO: fix possible bug if collection is not an array;
+          const updatedCollection = [...currentDB[collection]];
+          updatedCollection.push(newCollectionElem);
 
-        const updatedDB = {};
-        updatedDB[collection] = updatedCollection;
-        return promises.writeFile(
-          this.#dbPath,
-          JSON.stringify(Object.assign(currentDB, updatedDB))
-        );
-      })
-      .catch(err => {
-        throw new Error(err.message);
-      });
+          const updatedDB = {};
+          updatedDB[collection] = updatedCollection;
+          return promises.writeFile(
+            this.#dbPath,
+            JSON.stringify(Object.assign(currentDB, updatedDB))
+          );
+        })
+        .then(() => {
+          resolve("Post added.");
+        })
+        .catch(err => {
+          throw new Error(err.message);
+        });
+    });
   }
   updateData({ collection, data }) {
     const { id, userName, comment } = data;
