@@ -8,7 +8,6 @@ class ResponseHandler {
   }
 
   sendResponseWithPage(statusCode, statusMessage, htmlPage) {
-    console.log("RESPONSE WITH PAGE");
     this.response.setHeader("Content-type", "text/html");
     this.response.statusCode = statusCode;
     this.response.statusMessage = statusMessage;
@@ -74,7 +73,6 @@ class ResponseHandler {
     this.response.end();
   }
   sendResponseWithJson(statusCode, statusMessage, data) {
-    console.log("RESPONSE WITH JSON DATA");
     this.response.setHeader("Content-type", "application/json");
     this.response.statusCode = statusCode;
     this.response.statusMessage = statusMessage;
