@@ -1,4 +1,3 @@
-const { createReadStream, promises } = require("fs");
 const { join } = require("path");
 
 const ResponseHandler = require("./ResponseHandler.js");
@@ -12,7 +11,6 @@ class Router {
     clientPathRegExp: new RegExp("/client", "i")
   };
   #props;
-
   #responseHandler;
 
   getServerData(data) {
@@ -31,21 +29,24 @@ class Router {
     this.handleMethod(request, response);
   }
 
-  handleMethod(request, response) {
+  handleMethod(request) {
     try {
+      const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
       const { method } = request;
+      const { pathname } = parsedUrl;
+
       switch (method) {
         case "GET":
-          this.handleGet(request, response);
+          this.handleGet(pathname);
           break;
         case "POST":
-          this.handlePost(request, response);
+          this.handlePost(request, pathname);
           break;
         case "PUT":
-          this.handlePut(request, response);
+          this.handlePut(request, pathname);
           break;
         case "DELETE":
-          this.handleDelete(request, response);
+          this.handleDelete(request, pathname);
           break;
       }
     } catch (err) {
@@ -58,11 +59,7 @@ class Router {
       this.handleError(errData);
     }
   }
-  async handleGet(request, response) {
-    // TODO: move to separate function getPathname
-    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
-    const { pathname } = parsedUrl;
-
+  async handleGet(pathname) {
     if (pathname === "/") {
       this.#responseHandler.sendResponseWithPage(200, "Success", page);
     } else if (
@@ -92,10 +89,7 @@ class Router {
       });
     });
   }
-  async handlePost(request) {
-    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
-    const { pathname } = parsedUrl;
-
+  async handlePost(request, pathname) {
     if (this.#path.messagesPathRegExp.test(pathname)) {
       await this.#props.db.createCollection("messages");
 
@@ -112,10 +106,7 @@ class Router {
       );
     }
   }
-  async handlePut(request) {
-    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
-    const { pathname } = parsedUrl;
-
+  async handlePut(request, pathname) {
     if (this.#path.messagesPathRegExp.test(pathname)) {
       const body = await this.getRequestBody(request);
       const responseMessage = await this.#props.db.updateData({
@@ -130,10 +121,7 @@ class Router {
       );
     }
   }
-  async handleDelete(request) {
-    const parsedUrl = new URL(request.url, `http://${request.headers.host}`);
-    const { pathname } = parsedUrl;
-
+  async handleDelete(request, pathname) {
     if (this.#path.messagesPathRegExp.test(pathname)) {
       const body = await this.getRequestBody(request);
       const responseMessage = await this.#props.db.deleteData({
