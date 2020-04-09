@@ -1,4 +1,4 @@
-import {join} from 'path';
+import { join } from 'path';
 
 export const page: string = `
   <html>
