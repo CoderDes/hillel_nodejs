@@ -25,30 +25,16 @@ class Finder extends EventEmitter {
       files: 0,
       directories: 0
     };
-    this.on("started", () => this.parse(this.initialPath));
-    this.on("file", filePath => {
-      clearTimeout(this.timerId);
-      this.handleFile(filePath);
-      this.timerId = setTimeout(() => {
-        this.emit("processing", this.checked);
-        this.emit("finished");
-      }, 2000);
+    setImmediate(() => {
+      this.emit("started");
     });
-    this.on("directory", dirPath => this.handleDirectory(dirPath));
-    this.on("processing", checked =>
-      console.log(
-        `Were checked ${checked.files} files, ${checked.directories} directories.`
-      )
-    );
-    this.on("finished", () => console.log("PARSING IS FINISHED"));
-    this.emit("started");
   }
   checkPath(path) {
-    fs.access(path, err => {
-      if (err) {
-        throw new Error(err.message);
-      }
-    });
+    try {
+      fs.accessSync(path);
+    } catch (err) {
+      throw new Error(err.message);
+    }
   }
   calcCurrentDeepness(elemPath) {
     const relativePath = pathModule.relative(elemPath, this.initialPath);
@@ -70,9 +56,7 @@ class Finder extends EventEmitter {
   }
   handleFile(filePath) {
     this.checked.files++;
-    if (this.filter && !filePath.includes(this.filter)) {
-      return;
-    }
+
     if (this.checkFileExtension(filePath, process.env.EXT)) {
       this.drawFileName(filePath, this.colors);
     }
@@ -80,6 +64,9 @@ class Finder extends EventEmitter {
   handleDirectory(dirPath) {
     this.checked.directories++;
     this.parse(dirPath);
+    setImmediate(() => {
+      this.emit("finished");
+    });
   }
   iterateDirectoryContent(elements, path) {
     elements.forEach(elem => {
@@ -87,22 +74,25 @@ class Finder extends EventEmitter {
       const currentPath = pathModule.resolve(path, name);
       const currentDeep = this.calcCurrentDeepness(currentPath);
 
-      if (elem.isFile()) {
+      if (elem.isFile() && elem.name.includes(this.filter)) {
         this.emit("file", currentPath);
       }
-      if ((elem.isDirectory() && !this.deep) || currentDeep <= this.deep) {
+      if ((elem.isDirectory() && !this.deep) || currentDeep < this.deep) {
         this.emit("directory", currentPath);
       }
     });
   }
+  readDirectory(path) {
+    try {
+      return fs.readdirSync(path, { withFileTypes: true });
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  }
   parse(path) {
     this.checkPath(path);
-    fs.readdir(path, { withFileTypes: true }, (err, dirElems) => {
-      if (err) {
-        throw new Error(err.message);
-      }
-      this.iterateDirectoryContent(dirElems, path);
-    });
+    const dirElems = this.readDirectory(path);
+    this.iterateDirectoryContent(dirElems, path);
   }
 }
 
