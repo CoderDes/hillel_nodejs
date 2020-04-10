@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc --watch & cross-env PORT=3000 nodemon dist/app.js"
+    "start": "tsc --watch & cross-env PORT=3000 node dist/app.js",
+    "reload": "node dist/app.js"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "typescript": "^3.8.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.3"
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   }
 }
