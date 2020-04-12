@@ -1,7 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
-exports.page = `
+const { join } = require("path");
+
+module.exports = {
+  page: `
   <html>
     <head>
       <title>Homework http module</title>
@@ -26,11 +26,11 @@ exports.page = `
           </button>
         </form>
       </main>
-      <script src="/${path_1.join("scripts", "index.js")}"></script>
+      <script src="/${join("scripts", "index.js")}"></script>
     </body>
   </html>
-`;
-exports.notFound = `
+`,
+  notFound: `
   <html>
     <head>
       <title>Homework http module</title>
@@ -40,5 +40,5 @@ exports.notFound = `
       <h1>Page not found. Sorry. Possibly, invalid URL.</h1>
     </body>
   </html>
-`;
-//# sourceMappingURL=pages.js.map
+`,
+};
