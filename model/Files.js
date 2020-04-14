@@ -1,23 +1,4 @@
-const mongoose = require("mongoose");
-
-mongoose.set("debug", true);
-
-mongoose.connect("mongodb://localhost:27017", {
-  dbName: "filesDB",
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const filesDB = mongoose.connection;
-
-filesDB.on("error", () => {
-  console.error("Connection error:");
-});
-
-filesDB.on("open", () => {
-  console.log("WE ARE CONNECTED TO DB");
-});
-
+const mongoose = require("../database/connect.js");
 // TODO: find out how to set indexes in modern way (not deprecated)
 const fileDataSchema = new mongoose.Schema({
   name: { type: String, require: true, unique: true, index: true },
