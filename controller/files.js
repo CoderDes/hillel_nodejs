@@ -46,29 +46,30 @@ exports.getAllFilesWithExtension = async (req, res) => {
   // TODO: solve issue with chunked image on client
   fileNamesArr.forEach(name => {
     const rs = fs.createReadStream(join(__dirname, "..", "assets", name));
+    const logData = {};
 
     res.once("pipe", () => {
       timer.startTime();
-      console.log("RESPONSE STARTED");
     });
     res.on("error", () => {
-      timer.end();
-      console.log("RESPONSE ERROR");
-    });
-    res.once("close", () => {
-      const logData = {};
+      timer.endTime();
       logData.start = timer.startFormatted;
       logData.end = timer.endFormatted;
       logData.duration = timer.calcStartEndDiff();
-
+      logData.status = "Failed";
+      res.status(500).send("Sorry, something went wrong.");
+    });
+    res.once("close", () => {
       logger.writeLogData(logData).catch(err => {
         throw new Error(err);
       });
-      console.log("RESPONSE CLOSED BY CLIENT");
     });
     res.once("finish", () => {
       timer.endTime();
-      console.log("RESPONSE FINISHED");
+      logData.start = timer.startFormatted;
+      logData.end = timer.endFormatted;
+      logData.duration = timer.calcStartEndDiff();
+      logData.status = "Success";
     });
 
     rs.pipe(res);

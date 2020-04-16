@@ -23,8 +23,8 @@ class Logger {
   createLogFile() {
     return promises.writeFile(this.#logFilePath, "");
   }
-  writeLogData({ start, end, duration }) {
-    const content = `\n startAt: ${start};\n endAt: ${end};\n duration: ${duration} sec;\n`;
+  writeLogData({ start, end, duration, status }) {
+    const content = `\n startAt: ${start};\n endAt: ${end};\n duration: ${duration} sec;\n status: ${status};\n`;
     return promises.appendFile(this.#logFilePath, content);
   }
 }
