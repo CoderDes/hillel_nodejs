@@ -14,21 +14,7 @@ const Timer = require("../util/Timer.js");
 const logger = new Logger();
 const timer = new Timer();
 
-logger
-  .checkLogDirExist()
-  .catch(err => {
-    return logger.createLogDir();
-  })
-  .then(() => {
-    console.log("Log directory exists.");
-    return logger.checkLogFileExist();
-  })
-  .catch(err => {
-    return logger.createLogFile();
-  })
-  .then(() => {
-    console.log("Log file exists.");
-  });
+logger.init();
 
 exports.getAllFilesWithExtension = async (req, res) => {
   const { path } = req;
@@ -60,7 +46,7 @@ exports.getAllFilesWithExtension = async (req, res) => {
       res.status(500).send("Sorry, something went wrong.");
     });
     res.once("close", () => {
-      logger.writeLogData(logData).catch(err => {
+      logger.writeTimeLogData(logData).catch(err => {
         throw new Error(err);
       });
     });

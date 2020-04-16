@@ -3,13 +3,14 @@ const { join } = require("path");
 
 class Logger {
   #logDirPath = join(__dirname, "..", "log");
-  #logFilePath = join(this.#logDirPath, "log.txt");
+  #timeLog = join(this.#logDirPath, "time-log.txt");
+  #observeLog = join(this.#logDirPath, "observe-log.txt");
 
   set setLogFileName(value = "log.txt") {
     if (typeof value !== "string") {
       throw new Error("Argument must be a string.");
     }
-    this.#logFilePath = join(__dirname, "..", value);
+    this.#timeLog = join(__dirname, "..", value);
   }
   createLogDir() {
     return promises.mkdir(this.#logDirPath);
@@ -17,15 +18,40 @@ class Logger {
   checkLogDirExist() {
     return promises.access(this.#logDirPath);
   }
-  checkLogFileExist() {
-    return promises.access(this.#logFilePath);
+  checkLogFileExist(type) {
+    const path = type === "observe" ? this.#timeLog : this.#observeLog;
+    return promises.access(path);
   }
-  createLogFile() {
-    return promises.writeFile(this.#logFilePath, "");
+  createLogFile(type) {
+    const path = type === "observe" ? this.#timeLog : this.#observeLog;
+    return promises.writeFile(path, "");
   }
-  writeLogData({ start, end, duration, status }) {
+  writeObserveLogData() {}
+  writeTimeLogData({ start, end, duration, status }) {
     const content = `\n startAt: ${start};\n endAt: ${end};\n duration: ${duration} sec;\n status: ${status};\n`;
-    return promises.appendFile(this.#logFilePath, content);
+    return promises.appendFile(this.#timeLog, content);
+  }
+  init() {
+    this.checkLogDirExist()
+      .catch(err => {
+        return this.createLogDir();
+      })
+      .then(() => {
+        console.log("Log directory exists.");
+        return this.checkLogFileExist("time");
+      })
+      .catch(err => {
+        return this.createLogFile("time");
+      })
+      .then(() => {
+        return this.checkLogFileExist("observe");
+      })
+      .catch(err => {
+        return this.createLogFile("observe");
+      })
+      .then(() => {
+        console.log("Log files exists.");
+      });
   }
 }
 
