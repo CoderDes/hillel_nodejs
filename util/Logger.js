@@ -3,10 +3,13 @@ const { join } = require("path");
 
 class Logger {
   #logDirPath = join(__dirname, "..", "log");
-  #logFileName = "log.txt";
+  #logFilePath = join(this.#logDirPath, "log.txt");
 
-  set setLogFileName(value) {
-    this.#logFileName = value;
+  set setLogFileName(value = "log.txt") {
+    if (typeof value !== "string") {
+      throw new Error("Argument must be a string.");
+    }
+    this.#logFilePath = join(__dirname, "..", value);
   }
   createLogDir() {
     return promises.mkdir(this.#logDirPath);
@@ -15,18 +18,14 @@ class Logger {
     return promises.access(this.#logDirPath);
   }
   checkLogFileExist() {
-    return promises.access(join(this.#logDirPath, this.#logFileName));
+    return promises.access(this.#logFilePath);
   }
   createLogFile() {
-    return promises.writeFile(join(this.#logDirPath, this.#logFileName), "");
+    return promises.writeFile(this.#logFilePath, "");
   }
   writeLogData({ start, end, duration }) {
-    const content = `
-        startAt: ${start};
-        endAt: ${end};
-        duration: ${duration};
-      `;
-    return promises.appendFile(this.#logFileName, content);
+    const content = `\n startAt: ${start};\n endAt: ${end};\n duration: ${duration} sec;\n`;
+    return promises.appendFile(this.#logFilePath, content);
   }
 }
 

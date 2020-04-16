@@ -57,10 +57,13 @@ exports.getAllFilesWithExtension = async (req, res) => {
     });
     res.once("close", () => {
       const logData = {};
-      logData.startTime = timer.start;
-      logData.endTime = timer.end;
+      logData.start = timer.startFormatted;
+      logData.end = timer.endFormatted;
       logData.duration = timer.calcStartEndDiff();
-      logger.writeLogData(logData);
+
+      logger.writeLogData(logData).catch(err => {
+        throw new Error(err);
+      });
       console.log("RESPONSE CLOSED BY CLIENT");
     });
     res.once("finish", () => {
