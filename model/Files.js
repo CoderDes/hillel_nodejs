@@ -8,7 +8,8 @@ const fileDataSchema = new mongoose.Schema({
 
 const filesSchema = new mongoose.Schema({
   name: { type: String, require: true, unique: true },
-  buffer: { type: Buffer, require: true, unique: true },
+  file: { type: Buffer, require: true, unique: true },
+  mime: { type: String, require: true },
 });
 
 const FilesDataModel = mongoose.model("FilesData", fileDataSchema, "filesData");
