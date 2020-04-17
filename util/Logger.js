@@ -35,10 +35,16 @@ class Logger {
     return promises.access(this.#logDirPath);
   }
   checkLogFileExist(type) {
+    if (typeof type !== "string") {
+      throw new Error("Argument must be a string.");
+    }
     const path = type === "observe" ? this.#timeLog : this.#observeLog;
     return promises.access(path);
   }
   createLogFile(type) {
+    if (typeof type !== "string") {
+      throw new Error("Argument must be a string.");
+    }
     const path = type === "observe" ? this.#timeLog : this.#observeLog;
     return promises.writeFile(path, "");
   }
