@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { join } = require("path");
 
-const { FilesDataModel, FilesModel } = require("../model/Files.js");
+const { FilesDataModel } = require("../model/Files.js");
 const {
   checkAssetsDir,
   createAssetsDir,
@@ -16,7 +16,7 @@ const timer = new Timer();
 
 logger.init();
 
-exports.getAllFilesWithExtension = async (req, res) => {
+exports.getAllFilesFromDB = async (req, res) => {
   const { path } = req;
   const requiredExt = path.slice(1);
 
@@ -109,4 +109,10 @@ exports.loadFilesToDB = async () => {
   throw new Error(
     "Assets directory is empty. Please, add files to assets directory.",
   );
+};
+
+exports.getFiles = (req, res) => {
+  const { path } = req;
+  const rs = fs.createReadStream(join(__dirname, "..", path));
+  rs.pipe(res);
 };
