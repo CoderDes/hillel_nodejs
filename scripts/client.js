@@ -38,8 +38,9 @@ class MessageHandler {
   }
   getFormData() {
     const formData = {};
-    formData.userName = this.userName.value;
-    formData.comment = this.textarea.value;
+    formData.sender = this.userName.value;
+    formData.text = this.textarea.value;
+    formData.addedAt = new Date().toString();
     return formData;
   }
   updateMessage(messageData) {
@@ -78,8 +79,8 @@ class MessageHandler {
     const messageComment = message.querySelector("input[data-comment]").value;
     return {
       id: messageId,
-      userName: messageAuthor,
-      comment: messageComment,
+      sender: messageAuthor,
+      text: messageComment,
     };
   }
   editMessage({ messageElem, data }) {
@@ -137,10 +138,10 @@ class MessageHandler {
       const listItem = `
         <li class="message">
           <input type="hidden" value="${message.id}" data-id />
-          <input type="hidden" value="${message.userName}" data-author />
-          <input type="hidden" value="${message.comment}" data-comment />
-          <p class="message__author">Username: ${message.userName}</p>
-          <p class="message__comment">Comment: <br /> ${message.comment}</p>
+          <input type="hidden" value="${message.sender}" data-author />
+          <input type="hidden" value="${message.text}" data-comment />
+          <p class="message__author">Username: ${message.sender}</p>
+          <p class="message__comment">Comment: <br /> ${message.text}</p>
           <div class="message__buttons">
             <button class="message__edit message__button button">Edit</button>
             <button class="message__delete message__button button">Delete</button>

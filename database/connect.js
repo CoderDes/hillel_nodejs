@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 mongoose.set("debug", true);
 
 mongoose.connect("mongodb://localhost:27017", {
-  dbName: "filesDB",
+  dbName: "express-homework",
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
