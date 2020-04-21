@@ -5,15 +5,6 @@ exports.getAllMessages = async (req, res) => {
   res.status(200).send(messages);
 };
 
-exports.getMessageById = async (req, res) => {
-  const {
-    body: { __id },
-  } = req;
-
-  const message = await MessageModel.find({ __id: __id }).lean().exec();
-  console.log("TARGET MESSAGE", message);
-};
-
 exports.submitNewMessage = async (req, res) => {
   const {
     body: { text, sender, addedAt },
@@ -22,4 +13,22 @@ exports.submitNewMessage = async (req, res) => {
   const messageDoc = await MessageModel.create({ text, sender, addedAt });
 
   messageDoc.save();
+};
+
+exports.updateMessageById = async (req, res) => {
+  const {
+    body: { _id, sender, text, addedAt },
+  } = req;
+
+  await MessageModel.updateOne(
+    { _id: _id },
+    { $set: { sender: sender, text: text, addedAt: addedAt } },
+  );
+};
+
+exports.deleteMessageById = async (req, res) => {
+  const {
+    body: { _id },
+  } = req;
+  await MessageModel.deleteOne({ _id: _id });
 };

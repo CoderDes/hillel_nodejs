@@ -44,7 +44,7 @@ class MessageHandler {
     return formData;
   }
   updateMessage(messageData) {
-    fetch(this.url, {
+    fetch(`${this.url}/${messageData._id}`, {
       method: "PUT",
       headers: {
         "Content-type": "application/json",
@@ -77,15 +77,17 @@ class MessageHandler {
     const messageId = message.querySelector("input[data-id]").value;
     const messageAuthor = message.querySelector("input[data-author]").value;
     const messageComment = message.querySelector("input[data-comment]").value;
+    const messageDate = message.querySelector("input[data-date]").value;
     return {
-      id: messageId,
+      _id: messageId,
       sender: messageAuthor,
       text: messageComment,
+      addedAt: messageDate,
     };
   }
   editMessage({ messageElem, data }) {
     const self = this;
-    const comment = messageElem.querySelector(".message__comment");
+    const commentField = messageElem.querySelector(".message__comment");
     const btnSection = messageElem.querySelector(".message__buttons");
     const textArea = document.createElement("textarea");
     const saveBtn = document.createElement("button");
@@ -97,7 +99,7 @@ class MessageHandler {
     }
 
     textArea.classList.add("message__textarea-edit");
-    textArea.value = data.comment;
+    textArea.value = data.text;
 
     saveBtn.textContent = "Save";
     saveBtn.classList.add("message__button", "button");
@@ -109,8 +111,8 @@ class MessageHandler {
     function onSave(event) {
       const updatedData = { ...data };
       event.preventDefault();
-      comment.textContent = textArea.value;
-      updatedData.comment = comment.textContent;
+      commentField.textContent = textArea.value;
+      updatedData.text = commentField.textContent;
       self.updateMessage(updatedData);
       cleanUp();
     }
@@ -122,8 +124,7 @@ class MessageHandler {
   }
   deleteMessage({ messageElem, data }) {
     messageElem.parentElement.removeChild(messageElem);
-
-    fetch(this.url, {
+    fetch(`${this.url}/${data._id}`, {
       method: "DELETE",
       headers: {
         "Content-type": "application/json",
@@ -133,13 +134,14 @@ class MessageHandler {
   }
   renderMessages(messageData) {
     this.messageList.innerHTML = "";
-    // TODO: create element with DOM API instead of innerHTML
+
     messageData.forEach(message => {
       const listItem = `
         <li class="message">
-          <input type="hidden" value="${message.id}" data-id />
+          <input type="hidden" value="${message._id}" data-id />
           <input type="hidden" value="${message.sender}" data-author />
           <input type="hidden" value="${message.text}" data-comment />
+          <input type="hidden" value="${message.addedAt}" data-date />
           <p class="message__author">Username: ${message.sender}</p>
           <p class="message__comment">Comment: <br /> ${message.text}</p>
           <div class="message__buttons">

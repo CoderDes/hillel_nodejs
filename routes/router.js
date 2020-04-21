@@ -5,8 +5,9 @@ const { Router } = require("express");
 const { getAllFilesFromDB, getFiles } = require("../controller/files.js");
 const {
   getAllMessages,
-  getMessageById,
   submitNewMessage,
+  updateMessageById,
+  deleteMessageById,
 } = require("../controller/messages.js");
 const Logger = require("../util/Logger.js");
 
@@ -30,6 +31,7 @@ router.route(/\/(png|jpg|mp4)$/).get(getAllFilesFromDB);
 router.route(/\.(css|js)$/).get(getFiles);
 
 router.route("/messages").get(getAllMessages).post(submitNewMessage);
-router.route("/messages/:id").post(getMessageById);
+
+router.route("/messages/:id").put(updateMessageById).delete(deleteMessageById);
 
 module.exports = router;
