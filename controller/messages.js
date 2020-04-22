@@ -29,6 +29,8 @@ exports.submitNewMessage = async (req, res) => {
   const messageDoc = await MessageModel.create({ text, sender, addedAt });
 
   messageDoc.save();
+
+  res.status(200).send("Message has been posted.");
 };
 
 exports.updateMessageById = async (req, res) => {
@@ -40,6 +42,8 @@ exports.updateMessageById = async (req, res) => {
     { _id: _id },
     { $set: { sender: sender, text: text, addedAt: addedAt } },
   );
+
+  res.status(200).send("Message has been updated.");
 };
 
 exports.deleteMessageById = async (req, res) => {
@@ -47,4 +51,6 @@ exports.deleteMessageById = async (req, res) => {
     body: { _id },
   } = req;
   await MessageModel.deleteOne({ _id: _id });
+
+  res.status(200).send("Message has been deleted.");
 };
