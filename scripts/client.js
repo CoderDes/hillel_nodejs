@@ -31,7 +31,6 @@ class MessageHandler {
         return response.json();
       })
       .then(data => {
-        // TODO: implement rendering single message, not all
         this.renderMessages(data);
       })
       .catch(err => console.error(err));
@@ -58,7 +57,6 @@ class MessageHandler {
         return response.json();
       })
       .then(data => {
-        // TODO: implement rendering single message, not all
         this.renderMessages(data);
       })
       .catch(error => console.error(error));
@@ -134,25 +132,50 @@ class MessageHandler {
       body: JSON.stringify(data),
     }).catch(error => console.error(error));
   }
+  createMessage(data) {
+    const { _id, sender, text, addedAt } = data;
+
+    return `
+      <li class="message">
+        <input type="hidden" value="${_id}" data-id />
+        <input type="hidden" value="${sender}" data-author />
+        <input type="hidden" value="${text}" data-comment />
+        <input type="hidden" value="${addedAt}" data-date />
+        <p class="message__author">Username: ${sender}</p>
+        <p class="message__comment">Comment: <br /> ${text}</p>
+        <div class="message__buttons">
+          <button class="message__edit message__button button">Edit</button>
+          <button class="message__delete message__button button">Delete</button>
+        </div>
+      </li>
+    `;
+  }
   renderMessages(messageData) {
     this.messageList.innerHTML = "";
 
-    messageData.forEach(message => {
-      const listItem = `
-        <li class="message">
-          <input type="hidden" value="${message._id}" data-id />
-          <input type="hidden" value="${message.sender}" data-author />
-          <input type="hidden" value="${message.text}" data-comment />
-          <input type="hidden" value="${message.addedAt}" data-date />
-          <p class="message__author">Username: ${message.sender}</p>
-          <p class="message__comment">Comment: <br /> ${message.text}</p>
-          <div class="message__buttons">
-            <button class="message__edit message__button button">Edit</button>
-            <button class="message__delete message__button button">Delete</button>
-          </div>
-        </li>
-      `;
-      this.messageList.innerHTML += listItem;
+    if (this.messageList.children.length) {
+      const messageIds = new Set();
+
+      messageData.forEach(message => {
+        messageIds.add(message._id);
+      });
+
+      let buffer = "";
+      [...messageIds].forEach(uniqueId => {
+        for (let listItem of this.messageList.children) {
+          if (listItem.querySelector("input[data-id]").value !== uniqueId) {
+            const data = messageData.find(msg => messageIds.has(msg._id));
+            buffer += this.createMessage(data);
+          }
+        }
+      });
+
+      this.messageList.innerHTML += buffer;
+      return;
+    }
+
+    messageData.forEach(data => {
+      this.messageList.innerHTML += this.createMessage(data);
     });
   }
   initialize() {
