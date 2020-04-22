@@ -1,7 +1,23 @@
 const MessageModel = require("../model/Messages.js");
+const { validationQuery } = require("../util/messages.js");
 
 exports.getAllMessages = async (req, res) => {
-  const messages = await MessageModel.find().lean().exec();
+  const {
+    query: { sort = "addedAt", sortValue = "asc", limit = 10, skip = 0 },
+  } = req;
+
+  try {
+    validationQuery({ sort, sortValue, limit, skip });
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+
+  const messages = await MessageModel.find()
+    .sort({ sort: sortValue })
+    .skip(skip)
+    .limit(limit)
+    .lean()
+    .exec();
   res.status(200).send(messages);
 };
 

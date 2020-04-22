@@ -64,7 +64,9 @@ class MessageHandler {
       .catch(error => console.error(error));
   }
   fetchAllMessages() {
-    fetch("http://localhost:3000/messages")
+    const url = window.location.href;
+    const queryParamsStr = url.split("?")[1];
+    fetch(`http://localhost:3000/messages?${queryParamsStr}`)
       .then(response => {
         return response.json();
       })
